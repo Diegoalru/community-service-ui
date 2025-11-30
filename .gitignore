@@ -38,6 +38,9 @@ testem.log
 /typings
 __screenshots__/
 
+# Ignore runtime run files
+.run/
+
 # System files
 .DS_Store
 Thumbs.db
