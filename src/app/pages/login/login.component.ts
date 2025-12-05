@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -15,7 +16,7 @@ export class  LoginComponent {
   errorMessage: string | null = null;
   infoMessage: string | null = null;
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private router: Router) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]],
@@ -39,12 +40,12 @@ export class  LoginComponent {
   }
 
   onForgotPassword(): void {
-    // TODO: redirigir a /auth/forgot-password o abrir modal
-    console.log('Ir a recuperar contraseña');
+    // TODO: redirigir a forgot-password o abrir modal
+     this.router.navigate(['/forgot-password']);
   }
 
   onRegister(): void {
     // TODO: redirigir a /auth/register
-    console.log('Ir a registro de usuario');
+    console.log('Ir a registro de usuario'); 
   }
 }
