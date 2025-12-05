@@ -1,0 +1,129 @@
+<div class="page-auth">
+  <div class="login-wrapper">
+
+    <!-- Panel izquierdo: formulario de registro -->
+    <section class="card">
+      <h1>Crear cuenta</h1>
+      <p class="subtitle">
+        Completa la información para crear tu cuenta dentro del sistema de voluntariado.
+      </p>
+
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+
+        <!-- Nombre -->
+        <div class="form-group">
+          <label for="nombre">Nombre completo</label>
+          <input
+            id="nombre"
+            type="text"
+            placeholder="Tu nombre completo"
+            formControlName="nombre"
+          />
+        </div>
+
+        <!-- Correo -->
+        <div class="form-group">
+          <label for="email">Correo electrónico</label>
+          <input
+            id="email"
+            type="email"
+            placeholder="tu.correo@universidad.ac.cr"
+            formControlName="email"
+          />
+        </div>
+
+        <!-- Teléfono -->
+        <div class="form-group">
+          <label for="telefono">Teléfono</label>
+          <input
+            id="telefono"
+            type="text"
+            placeholder="8888-8888"
+            formControlName="telefono"
+          />
+        </div>
+
+        <!-- Contraseña -->
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <input
+            id="password"
+            type="password"
+            placeholder="Crea una contraseña"
+            formControlName="password"
+          />
+        </div>
+
+        <!-- Confirmar contraseña -->
+        <div class="form-group">
+          <label for="confirmPassword">Confirmar contraseña</label>
+          <input
+            id="confirmPassword"
+            type="password"
+            placeholder="Repite tu contraseña"
+            formControlName="confirmPassword"
+          />
+        </div>
+
+        <!-- Acciones -->
+        <div class="actions">
+          <a
+            class="btn btn-ghost btn-small"
+            (click)="goToLogin()"
+          >
+            ¿Ya tienes cuenta? Inicia sesión
+          </a>
+
+          <div>
+            <button type="submit" class="btn btn-primary">
+              Crear cuenta
+            </button>
+          </div>
+        </div>
+
+        <!-- Errores -->
+        <div *ngIf="errorMessage" class="alert alert-error">
+          <div class="bullet">!</div>
+          <div>
+            <strong>No se pudo crear la cuenta.</strong><br />
+            {{ errorMessage }}
+          </div>
+        </div>
+
+        <!-- Mensaje de éxito -->
+        <div *ngIf="successMessage" class="alert alert-info">
+          <div class="bullet">i</div>
+          <div>
+            <strong>Cuenta creada exitosamente.</strong><br />
+            {{ successMessage }}
+          </div>
+        </div>
+
+      </form>
+    </section>
+
+    <!-- Panel derecho: información sobre el registro -->
+    <aside class="side-panel">
+      <h2>¿Por qué crear una cuenta?</h2>
+      <p>
+        Crear una cuenta te permite inscribirte en eventos, registrar horas de servicio
+        y obtener certificados de participación automáticamente.
+      </p>
+
+      <ul class="steps">
+        <li>Acceso a tu panel de voluntario o coordinador.</li>
+        <li>Inscribirte a eventos y registrar asistencia.</li>
+        <li>Descargar certificados digitales de servicio.</li>
+        <li>Mantener historial de participación.</li>
+      </ul>
+
+      <span class="label-tag">Requisitos</span>
+      <ul class="steps">
+        <li>Correo válido de contacto.</li>
+        <li>Contraseña con nivel adecuado de seguridad.</li>
+        <li>Información personal verídica para confirmar identidad.</li>
+      </ul>
+    </aside>
+
+  </div>
+</div>

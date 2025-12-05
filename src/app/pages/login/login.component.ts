@@ -46,6 +46,6 @@ export class  LoginComponent {
 
   onRegister(): void {
     // TODO: redirigir a /auth/register
-    console.log('Ir a registro de usuario'); 
+    this.router.navigate(['/register']);
   }
 }
