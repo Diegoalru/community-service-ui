@@ -1,0 +1,54 @@
+
+.side-panel {
+  align-self: stretch;
+  border-radius: 18px;
+  padding: 1.6rem 1.8rem;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid #e5e7eb;
+  backdrop-filter: blur(10px);
+}
+
+.side-panel h2 {
+  margin: 0 0 0.6rem;
+  font-size: 1.1rem;
+  color: #111827;
+}
+
+.side-panel p {
+  margin: 0;
+  font-size: 0.83rem;
+  color: #6b7280;
+}
+
+.alert {
+  border-radius: 10px;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.83rem;
+  margin-top: 0.6rem;
+  display: flex;
+  gap: 0.45rem;
+  align-items: flex-start;
+}
+
+.alert strong {
+  font-weight: 600;
+}
+
+.alert-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+.alert-info {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+}
+
+.bullet {
+  margin-top: 0.2rem;
+  font-size: 1.1rem;
+}
+
+

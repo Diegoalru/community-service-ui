@@ -607,4 +607,3 @@ input[type="radio"]:checked + label {
     transition-duration: 0.01ms !important;
   }
 }
-
