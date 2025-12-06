@@ -1,0 +1,104 @@
+<!-- login-page.component.html -->
+
+<div class="page-auth">
+  <div class="login-wrapper">
+    <!-- Panel izquierdo: formulario -->
+    <section class="card">
+      <h1>Iniciar sesión</h1>
+      <p class="subtitle">`
+        Ingresa con tu correo y contraseña para acceder al sistema de voluntariado.
+      </p>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <!-- Correo -->
+        <div class="form-group">
+          <label for="email">Correo electrónico</label>
+          <input
+            id="email"
+            type="email"
+            placeholder="tu.correo@ulacit.ac.cr"
+            formControlName="email"
+          />
+          <span class="help-text">
+            Debe corresponder a una cuenta registrada y activa en el sistema.
+          </span>
+        </div>
+
+        <!-- Contraseña -->
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <input
+            id="password"
+            type="password"
+            placeholder="Ingresa tu contraseña"
+            formControlName="password"
+          />
+        </div>
+
+        <!-- Acciones -->
+        <div class="actions">
+          <a class="btn btn-ghost btn-small" (click)="onForgotPassword()">
+            ¿Olvidaste tu contraseña?
+          </a>
+
+          <div>
+            <button type="button" class="btn btn-secondary" (click)="onRegister()">
+              Crear cuenta
+            </button>
+            <button type="submit" class="btn btn-primary">
+              Iniciar sesión
+            </button>
+          </div>
+        </div>
+
+        <!-- Mensaje de error (A1 – Credenciales inválidas) -->
+        <div *ngIf="errorMessage" class="alert alert-error">
+          <div class="bullet">!</div>
+          <div>
+            <strong>Correo o contraseña incorrectos.</strong><br />
+            {{ errorMessage }}
+          </div>
+        </div>
+
+        <!-- Mensaje informativo (A2 – Cuenta bloqueada o inactiva) -->
+        <div *ngIf="infoMessage && !errorMessage" class="alert alert-info">
+          <div class="bullet">i</div>
+          <div>
+            <strong>Tu cuenta está bloqueada o inactiva.</strong><br />
+            {{ infoMessage }}
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- Panel derecho: explicación del flujo -->
+    <aside class="side-panel">
+      <h2>Qué ocurre al iniciar sesión</h2>
+      <p>
+        El sistema valida tus credenciales y, si todo es correcto, crea una sesión de usuario
+        y te redirige al panel según tu rol.
+      </p>
+
+      <ul class="steps">
+        <li>Verifica que el correo exista en el sistema.</li>
+        <li>Comprueba que la contraseña coincida.</li>
+        <li>Confirma que tu cuenta no está bloqueada o deshabilitada.</li>
+        <li>Identifica tu rol principal (Voluntario, Coordinador o Administrador).</li>
+        <li>Crea una sesión y registra fecha y hora del acceso.</li>
+        <li>Te redirige al panel de control correspondiente a tu rol.</li>
+      </ul>
+
+      <span class="label-tag">Flujos alternos</span>
+      <ul class="steps">
+        <li>
+          <strong>A1 – Credenciales inválidas:</strong>
+          muestra mensaje de error y permite reintentar.
+        </li>
+        <li>
+          <strong>A2 – Cuenta bloqueada/inactiva:</strong>
+          informa el estado y da instrucciones para reactivación.
+        </li>
+      </ul>
+    </aside>
+  </div>
+</div>
