@@ -5,16 +5,12 @@ import { EventDto } from '../../models/EventRow';
 
 @Injectable({ providedIn: 'root' })
 export class EventsService {
-  /**
-   * `proxy.conf.json` mapea `/api` -> `https://localhost:44354`
-   * para evitar CORS.
-   */
+
   private readonly baseUrl = '/api';
 
   constructor(private http: HttpClient) {}
 
   getEvents(): Observable<EventDto[]> {
-    // OJO: baseUrl ya incluye /api (proxy). No dupliques /api aquí.
     return this.http.get<EventDto[]>(`${this.baseUrl}/Actividades`);
   }
 

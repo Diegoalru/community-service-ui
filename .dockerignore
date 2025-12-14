@@ -38,3 +38,4 @@ Dockerfile
 
 # Ignore run files directory
 .run/
+/.env
