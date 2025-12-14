@@ -1,0 +1,115 @@
+<div class="mx-auto max-w-6xl px-6 py-8">
+  <div class="mb-6">
+    <h1 class="text-2xl font-semibold text-slate-900">Eventos disponibles</h1>
+    <p class="mt-1 text-sm text-slate-600">
+      Visualiza los eventos disponibles e inscríbete con un solo clic.
+    </p>
+  </div>
+
+  <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div class="border-b border-slate-200 px-5 py-4">
+      <div class="flex items-center justify-between gap-3">
+        <h2 class="text-sm font-semibold text-slate-900">Listado</h2>
+        <span class="text-xs text-slate-500">Total: {{ events.length }}</span>
+      </div>
+    </div>
+
+    <div *ngIf="isLoading" class="px-5 py-10 text-center">
+      <p class="text-sm text-slate-600">Cargando eventos...</p>
+    </div>
+
+    <div *ngIf="!isLoading && isEmpty" class="px-5 py-10 text-center">
+      <p class="text-sm text-slate-600">No hay eventos disponibles por el momento.</p>
+    </div>
+
+    <div *ngIf="!isLoading && !isEmpty" class="overflow-x-auto">
+      <table class="min-w-full text-left text-sm">
+        <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600">
+          <tr>
+            <th class="whitespace-nowrap px-4 py-3">Nombre evento</th>
+            <th class="whitespace-nowrap px-4 py-3">Cupo</th>
+            <th class="whitespace-nowrap px-4 py-3">Hora</th>
+            <th class="whitespace-nowrap px-4 py-3">Lugar</th>
+            <th class="whitespace-nowrap px-4 py-3">Duración</th>
+            <th class="whitespace-nowrap px-4 py-3">Organización</th>
+            <th class="whitespace-nowrap px-4 py-3">Nombre coordinador</th>
+            <th class="whitespace-nowrap px-4 py-3 text-right">Acción</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-200">
+          <tr *ngFor="let row of events" class="hover:bg-slate-50/60">
+            <td class="px-4 py-3 font-medium text-slate-900">
+              {{ row.nombreEvento }}
+            </td>
+            <td class="px-4 py-3 text-slate-700">{{ row.cupo }}</td>
+            <td class="px-4 py-3 text-slate-700">{{ row.hora }}</td>
+            <td class="px-4 py-3 text-slate-700">{{ row.lugar }}</td>
+            <td class="px-4 py-3 text-slate-700">{{ row.duracion }}</td>
+            <td class="px-4 py-3 text-slate-700">{{ row.organizacion }}</td>
+            <td class="px-4 py-3 text-slate-700">{{ row.nombreCoordinador }}</td>
+            <td class="px-4 py-3 text-right">
+              <button
+                type="button"
+                class="inline-flex items-center justify-center rounded-md px-3 py-2 text-xs font-semibold transition
+                  focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
+                [class.bg-blue-600]="!isRegistered(row.id)"
+                [class.text-white]="!isRegistered(row.id)"
+                [class.hover:bg-blue-700]="!isRegistered(row.id)"
+                [class.bg-slate-200]="isRegistered(row.id)"
+                [class.text-slate-600]="isRegistered(row.id)"
+                [class.cursor-not-allowed]="isRegistered(row.id)"
+                [disabled]="isRegistered(row.id)"
+                (click)="onRegister(row)"
+              >
+                {{ isRegistered(row.id) ? 'Inscrito' : 'Inscribirse' }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de confirmación -->
+<div
+  *ngIf="isModalOpen"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Confirmación"
+  (click)="closeModal()"
+>
+  <div
+    class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <h3 class="text-base font-semibold text-slate-900">{{ modalTitle }}</h3>
+        <p class="mt-1 text-sm text-slate-600">{{ modalMessage }}</p>
+      </div>
+      <button
+        type="button"
+        class="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+        (click)="closeModal()"
+        aria-label="Cerrar"
+      >
+        ✕
+      </button>
+    </div>
+
+    <div class="mt-6 flex justify-end gap-2">
+      <button
+        type="button"
+        class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700
+          focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
+        (click)="closeModal()"
+      >
+        Aceptar
+      </button>
+    </div>
+  </div>
+</div>
+
+
