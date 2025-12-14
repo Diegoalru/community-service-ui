@@ -1,0 +1,145 @@
+<div class="min-h-screen bg-slate-50">
+  <!-- Top bar -->
+  <header class="border-b border-slate-200 bg-white/80 backdrop-blur">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+      <div class="flex items-center gap-2">
+        <div
+          class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white"
+          aria-hidden="true"
+        >
+          CS
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-slate-900">Community Service</p>
+          <p class="text-xs text-slate-500">Sistema de voluntariado</p>
+        </div>
+      </div>
+
+      <nav class="flex items-center gap-2">
+        <a
+          routerLink="/login"
+          class="rounded-md px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
+        >
+          Iniciar sesión
+        </a>
+        <a
+          routerLink="/register"
+          class="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
+        >
+          Crear cuenta
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <main class="mx-auto grid max-w-6xl gap-8 px-6 py-10 lg:grid-cols-2 lg:items-center">
+    <section>
+      <h1 class="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+        Encuentra eventos, inscríbete y registra tus horas de voluntariado.
+      </h1>
+      <p class="mt-4 text-base leading-relaxed text-slate-600">
+        Este landing page es un punto de entrada simple. Luego puedes agregar imagen principal,
+        contenido institucional y llamados a la acción adicionales.
+      </p>
+
+      <div class="mt-6 flex flex-wrap items-center gap-3">
+        <a
+          routerLink="/login"
+          class="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-950
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2"
+        >
+          Iniciar sesión
+        </a>
+        <a
+          routerLink="/register"
+          class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800
+            hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
+        >
+          Crear cuenta
+        </a>
+      </div>
+    </section>
+
+    <!-- Image placeholder -->
+    <section>
+      <div
+        class="flex aspect-[16/10] w-full items-center justify-center rounded-2xl border border-slate-300
+          bg-white text-center shadow-sm"
+      >
+      <img src="/banner.png" alt="Landing" class="h-full w-full object-cover rounded-2xl" />
+       
+      </div>
+    </section>
+  </main>
+
+  <!-- Benefits -->
+  <section class="mx-auto max-w-6xl px-6 pb-14">
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+      <div class="max-w-2xl">
+        <p class="text-xs font-semibold uppercase tracking-wide text-blue-700">Beneficios</p>
+        <h2 class="mt-2 text-2xl font-semibold tracking-tight text-slate-900">
+          Una plataforma pensada para universidades, organizaciones y voluntarios.
+        </h2>
+        <p class="mt-3 text-sm leading-relaxed text-slate-600">
+          Centraliza la gestión del servicio comunitario, mejora la comunicación y reduce el trabajo manual
+          con un flujo claro: publicar eventos, inscribir voluntarios, coordinar cupos y dar seguimiento.
+        </p>
+      </div>
+
+      <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="rounded-xl border border-slate-200 bg-slate-50 p-5">
+          <h3 class="text-sm font-semibold text-slate-900">Menos fricción administrativa</h3>
+          <p class="mt-2 text-sm text-slate-600">
+            Evita hojas de cálculo dispersas y consolidaciones manuales. Todo queda en un solo lugar,
+            con estados claros y trazabilidad.
+          </p>
+        </div>
+
+        <div class="rounded-xl border border-slate-200 bg-slate-50 p-5">
+          <h3 class="text-sm font-semibold text-slate-900">Mejor experiencia para el voluntario</h3>
+          <p class="mt-2 text-sm text-slate-600">
+            Los estudiantes encuentran eventos disponibles, ven cupos y horarios, se inscriben y reciben
+            confirmación inmediata.
+          </p>
+        </div>
+
+        <div class="rounded-xl border border-slate-200 bg-slate-50 p-5">
+          <h3 class="text-sm font-semibold text-slate-900">Coordinación más efectiva</h3>
+          <p class="mt-2 text-sm text-slate-600">
+            Asigna responsables, controla cupos y organiza la logística. Reduce cancelaciones y mejora la
+            puntualidad con información actualizada.
+          </p>
+        </div>
+
+        <div class="rounded-xl border border-slate-200 bg-slate-50 p-5">
+          <h3 class="text-sm font-semibold text-slate-900">Transparencia y seguimiento</h3>
+          <p class="mt-2 text-sm text-slate-600">
+            Mantén un historial de participación por evento y por persona, facilitando auditorías,
+            reportes y certificaciones.
+          </p>
+        </div>
+
+        <div class="rounded-xl border border-slate-200 bg-slate-50 p-5">
+          <h3 class="text-sm font-semibold text-slate-900">Impacto medible</h3>
+          <p class="mt-2 text-sm text-slate-600">
+            Convierte actividades aisladas en un programa. Estandariza procesos y demuestra resultados
+            con métricas operativas y de participación.
+          </p>
+        </div>
+
+        <div class="rounded-xl border border-slate-200 bg-slate-50 p-5">
+          <h3 class="text-sm font-semibold text-slate-900">Escalable y adaptable</h3>
+          <p class="mt-2 text-sm text-slate-600">
+            Funciona para campañas pequeñas o programas institucionales completos. Puedes evolucionar
+            reglas, roles y reportes según tu operación.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+
