@@ -14,6 +14,8 @@ COPY public/ ./public/
 COPY angular.json .
 COPY tsconfig.app.json .
 COPY tsconfig.json .
+COPY tailwind.config.mjs .
+COPY postcss.config.js .
 
 # Run the build script to compile the application.
 RUN npm run build
