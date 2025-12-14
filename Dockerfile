@@ -23,14 +23,14 @@ RUN npm run build
 # Stage 2: Serve the application from a lightweight Nginx server
 FROM nginx:alpine
 
-# Install curl for health checks
-RUN apk add --no-cache curl
+# Install curl for health checks and gettext for envsubst
+RUN apk add --no-cache curl gettext
 
 # Copy the built application artifacts from the builder stage to the Nginx web root directory.
 COPY --from=builder /app/dist/community-service-ui/browser /usr/share/nginx/html
 
-# Copy the custom Nginx configuration file.
-COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
+# Copy the custom Nginx configuration template.
+COPY nginx/nginx.conf.template /etc/nginx/conf.d/default.conf.template
 
 # Expose port 80 to allow traffic to the web server.
 EXPOSE 80
@@ -38,3 +38,7 @@ EXPOSE 80
 # Health check to ensure the server is responsive.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
   CMD curl -f http://localhost/ || exit 1
+
+# When the container starts, substitute the environment variables in the template
+# and start Nginx.
+CMD ["/bin/sh", "-c", "envsubst '${BACKEND_URL}' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]

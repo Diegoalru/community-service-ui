@@ -9,6 +9,14 @@ server {
   gzip_proxied expired no-cache no-store private auth;
   gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
 
+  location /api {
+    proxy_pass ${BACKEND_URL};
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+
   location ~* \.(?:css|js|ico|png|jpg|jpeg|gif|svg|woff2?)$ {
     try_files $uri =404;
     expires 1y;
