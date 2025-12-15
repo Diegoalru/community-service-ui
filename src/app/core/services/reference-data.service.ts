@@ -48,5 +48,10 @@ export class ReferenceDataService {
   getUniversidades(): Observable<Universidad[]> {
     return this.api.get<Universidad[]>('/Universidades');
   }
+
+  // Código postal por distrito
+  getCodigoPostal(idDistrito: number): Observable<{ codigo: string }> {
+    return this.api.get<{ codigo: string }>('/Ubicaciones/CodigoPostal', { idDistrito });
+  }
 }
 

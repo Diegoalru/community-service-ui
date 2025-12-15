@@ -3,30 +3,28 @@
 export interface Pais {
   idPais: number;
   nombre: string;
+  codigo?: string;
   estado?: string;
 }
 
 export interface Provincia {
-  idProvincia: number;
-  idPais: number;
+  id: number;
   nombre: string;
+  codigo?: string;
   estado?: string;
 }
 
 export interface Canton {
-  idCanton: number;
-  idProvincia: number;
-  idPais: number;
+  id: number;
   nombre: string;
+  codigo?: string;
   estado?: string;
 }
 
 export interface Distrito {
-  idDistrito: number;
-  idCanton: number;
-  idProvincia: number;
-  idPais: number;
+  id: number;
   nombre: string;
+  codigo?: string;
   estado?: string;
 }
 
@@ -37,7 +35,7 @@ export interface TipoCorrespondencia {
 }
 
 export interface TipoIdentificador {
-  idTipoIdentificador: number;
+  idIdentificador: number;
   descripcion: string;
   estado?: string;
 }

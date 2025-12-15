@@ -1,5 +1,5 @@
 // src/app/forgot-password.ts
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
@@ -26,10 +26,11 @@ export class ForgotPasswordComponent {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
   ) {
     this.form = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      username: ['', [Validators.required]],
     });
   }
 
@@ -40,19 +41,25 @@ export class ForgotPasswordComponent {
 
     this.isLoading = true;
     this.errorMessage = null;
-    const { email } = this.form.value;
+    const { username } = this.form.value;
 
-    this.authService.requestRecovery({ username: email }).subscribe({
+    this.authService.requestRecovery({ username }).subscribe({
       next: (response) => {
         this.isLoading = false;
         this.isSubmitted = true;
-        this.message = response.mensaje || 'Si el correo está registrado, recibirás un mensaje con instrucciones para recuperar tu contraseña.';
+        this.message = response.mensaje || 'Si el usuario está registrado, recibirás un mensaje con instrucciones para recuperar tu contraseña.';
+
+        // Force change detection
+        this.cdr.detectChanges();
       },
       error: () => {
-        // Always show generic message for security (don't reveal if email exists)
+        // Always show a generic message for security (don't reveal if the user exists)
         this.isLoading = false;
         this.isSubmitted = true;
-        this.message = 'Si el correo está registrado, recibirás un mensaje con instrucciones para recuperar tu contraseña.';
+        this.message = 'Si el usuario está registrado, recibirás un mensaje con instrucciones para recuperar tu contraseña.';
+
+        // Force change detection
+        this.cdr.detectChanges();
       }
     });
   }

@@ -21,22 +21,19 @@
           </div>
           <div class="section-content" *ngIf="sections.cuenta">
             <div class="form-group">
-              <label for="email">Correo electrónico institucional *</label>
+              <label for="username">Nombre de usuario *</label>
               <input
-                id="email"
-                type="email"
-                placeholder="tu.correo@universidad.ac.cr"
-                formControlName="email"
+                id="username"
+                type="text"
+                placeholder="Tu nombre de usuario para iniciar sesión"
+                formControlName="username"
               />
-              <small class="hint">Debe ser un correo educativo (.ac.cr, .ed, etc.)</small>
-              <small *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.errors?.['required']" class="error-text">
-                El correo es requerido
+              <small class="hint">Este será tu usuario para iniciar sesión en el sistema</small>
+              <small *ngIf="registerForm.get('username')?.touched && registerForm.get('username')?.errors?.['required']" class="error-text">
+                El nombre de usuario es requerido
               </small>
-              <small *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.errors?.['email']" class="error-text">
-                Ingresa un correo válido
-              </small>
-              <small *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.errors?.['educationalEmail']" class="error-text">
-                Debe ser un correo educativo (ej: .ac.cr, .edu)
+              <small *ngIf="registerForm.get('username')?.touched && registerForm.get('username')?.errors?.['maxlength']" class="error-text">
+                Máximo 50 caracteres
               </small>
             </div>
 
@@ -88,7 +85,7 @@
                 <label for="tipoIdentificador">Tipo de identificación *</label>
                 <select id="tipoIdentificador" formControlName="tipoIdentificador">
                   <option [ngValue]="null" disabled>Selecciona...</option>
-                  <option *ngFor="let tipo of tiposIdentificador" [ngValue]="tipo.idTipoIdentificador">
+                  <option *ngFor="let tipo of tiposIdentificador" [ngValue]="tipo.idIdentificador">
                     {{ tipo.descripcion }}
                   </option>
                 </select>
@@ -146,6 +143,23 @@
               />
             </div>
 
+            <div class="form-group">
+              <label for="email">Correo electrónico *</label>
+              <input
+                id="email"
+                type="email"
+                placeholder="tu.correo@ejemplo.com"
+                formControlName="email"
+              />
+              <small class="hint">Se usará para notificaciones y activación de cuenta</small>
+              <small *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.errors?.['required']" class="error-text">
+                El correo es requerido
+              </small>
+              <small *ngIf="registerForm.get('email')?.touched && (registerForm.get('email')?.errors?.['email'] || registerForm.get('email')?.errors?.['invalidEmail'])" class="error-text">
+                Ingresa un correo válido
+              </small>
+            </div>
+
             <div class="form-row">
               <div class="form-group">
                 <label for="universidad">Universidad</label>
@@ -197,7 +211,7 @@
                   <option [ngValue]="null" disabled>
                     {{ loadingProvincias ? 'Cargando...' : 'Selecciona...' }}
                   </option>
-                  <option *ngFor="let p of provincias" [ngValue]="p.idProvincia">
+                  <option *ngFor="let p of provincias" [ngValue]="p.id">
                     {{ p.nombre }}
                   </option>
                 </select>
@@ -211,7 +225,7 @@
                   <option [ngValue]="null" disabled>
                     {{ loadingCantones ? 'Cargando...' : 'Selecciona...' }}
                   </option>
-                  <option *ngFor="let c of cantones" [ngValue]="c.idCanton">
+                  <option *ngFor="let c of cantones" [ngValue]="c.id">
                     {{ c.nombre }}
                   </option>
                 </select>
@@ -223,7 +237,7 @@
                   <option [ngValue]="null" disabled>
                     {{ loadingDistritos ? 'Cargando...' : 'Selecciona...' }}
                   </option>
-                  <option *ngFor="let d of distritos" [ngValue]="d.idDistrito">
+                  <option *ngFor="let d of distritos" [ngValue]="d.id">
                     {{ d.nombre }}
                   </option>
                 </select>
@@ -359,11 +373,31 @@
 
       <span class="label-tag">Requisitos</span>
       <ul class="steps">
-        <li>Correo institucional válido (.ac.cr, .ed, etc.)</li>
+        <li>Nombre de usuario único para iniciar sesión.</li>
+        <li>Correo electrónico válido para notificaciones.</li>
         <li>Contraseña con mínimo 6 caracteres.</li>
         <li>Información personal verídica para confirmar identidad.</li>
       </ul>
     </aside>
 
+  </div>
+
+  <!-- Modal de éxito -->
+  <div *ngIf="showSuccessModal" class="modal-overlay" (click)="closeSuccessModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-icon success">
+        ✓
+      </div>
+      <h2>¡Cuenta creada exitosamente!</h2>
+      <p class="modal-message">{{ successMessage }}</p>
+      <p class="modal-instruction">
+        Por favor, revisa tu buzón de correo electrónico y sigue las instrucciones para activar tu cuenta.
+      </p>
+      <div class="modal-actions">
+        <button class="btn btn-primary" (click)="closeSuccessModal()">
+          Ir a inicio
+        </button>
+      </div>
+    </div>
   </div>
 </div>
