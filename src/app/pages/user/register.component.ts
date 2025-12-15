@@ -270,6 +270,90 @@ function validEmailValidator(control: AbstractControl): ValidationErrors | null 
       border-top: 1px solid #e0e0e0;
     }
 
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      animation: fadeIn 0.3s ease;
+    }
+    .modal-content {
+      background: white;
+      padding: 2.5rem;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      animation: slideUp 0.3s ease;
+    }
+    .modal-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      margin: 0 auto 1.5rem;
+      font-weight: bold;
+    }
+    .modal-icon.success {
+      background: #d4edda;
+      color: #155724;
+    }
+    .modal-content h2 {
+      margin: 0 0 1rem;
+      color: #155724;
+    }
+    .modal-message {
+      color: #666;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+    .modal-instruction {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 6px;
+      color: #495057;
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+    .modal-actions .btn {
+      min-width: 150px;
+    }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+    @keyframes slideUp {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
     /* Responsive */
     @media (max-width: 900px) {
       .register-wrapper {
@@ -294,6 +378,7 @@ export class RegisterComponent implements OnInit {
   errorMessage: string | null = null;
   successMessage: string | null = null;
   isLoading = false;
+  showSuccessModal = false;
 
   // Section collapse state
   sections = {
@@ -393,75 +478,101 @@ export class RegisterComponent implements OnInit {
   }
 
   private setupLocationCascade(): void {
-    // When country changes, load provinces
-    this.registerForm.get('pais')?.valueChanges.subscribe((idPais) => {
+    // País -> Provincias
+    this.registerForm.get('pais')?.valueChanges.subscribe((rawPais) => {
+      const idPais = rawPais !== null && rawPais !== undefined ? Number(rawPais) : null;
       this.provincias = [];
       this.cantones = [];
       this.distritos = [];
+
+      // Clear and disable downstream
       this.registerForm.get('provincia')?.reset(null, { emitEvent: false });
       this.registerForm.get('canton')?.reset(null, { emitEvent: false });
       this.registerForm.get('distrito')?.reset(null, { emitEvent: false });
-      this.registerForm.get('canton')?.disable({ emitEvent: false });
-      this.registerForm.get('distrito')?.disable({ emitEvent: false });
+      this.registerForm.get('canton')?.disable();
+      this.registerForm.get('distrito')?.disable();
 
       if (idPais) {
-        this.registerForm.get('provincia')?.enable({ emitEvent: false });
+        this.registerForm.get('provincia')?.enable();
+        this.registerForm.get('provincia')?.updateValueAndValidity();
         this.loadingProvincias = true;
         this.referenceDataService.getProvincias(idPais).subscribe({
-          next: (data) => {
-            this.provincias = data;
-            this.loadingProvincias = false;
-          },
-          error: () => this.loadingProvincias = false
+          next: (data) => { this.provincias = data; this.loadingProvincias = false; },
+          error: () => { this.loadingProvincias = false; }
         });
       } else {
-        this.registerForm.get('provincia')?.disable({ emitEvent: false });
+        this.registerForm.get('provincia')?.disable();
+        this.registerForm.get('provincia')?.updateValueAndValidity();
       }
     });
 
-    // When province changes, load cantons
-    this.registerForm.get('provincia')?.valueChanges.subscribe((idProvincia) => {
+    // Provincia -> Cantones
+    this.registerForm.get('provincia')?.valueChanges.subscribe((rawProv) => {
+      const idProvincia = rawProv !== null && rawProv !== undefined ? Number(rawProv) : null;
+      const idPais = this.registerForm.get('pais')?.value ? Number(this.registerForm.get('pais')?.value) : null;
+
       this.cantones = [];
       this.distritos = [];
       this.registerForm.get('canton')?.reset(null, { emitEvent: false });
       this.registerForm.get('distrito')?.reset(null, { emitEvent: false });
-      this.registerForm.get('distrito')?.disable({ emitEvent: false });
 
-      const idPais = this.registerForm.get('pais')?.value;
       if (idPais && idProvincia) {
-        this.registerForm.get('canton')?.enable({ emitEvent: false });
+        // Enable canton immediately so the UI reflects it
+        this.registerForm.get('canton')?.enable();
+        this.registerForm.get('canton')?.updateValueAndValidity();
         this.loadingCantones = true;
         this.referenceDataService.getCantones(idPais, idProvincia).subscribe({
-          next: (data) => {
-            this.cantones = data;
-            this.loadingCantones = false;
-          },
-          error: () => this.loadingCantones = false
+          next: (data) => { this.cantones = data; this.loadingCantones = false; },
+          error: () => { this.loadingCantones = false; }
         });
       } else {
-        this.registerForm.get('canton')?.disable({ emitEvent: false });
+        this.registerForm.get('canton')?.disable();
+        this.registerForm.get('canton')?.updateValueAndValidity();
       }
+
+      // Distrito stays disabled until a valid canton is selected
+      this.registerForm.get('distrito')?.disable();
+      this.registerForm.get('distrito')?.updateValueAndValidity();
     });
 
-    // When canton changes, load districts
-    this.registerForm.get('canton')?.valueChanges.subscribe((idCanton) => {
+    // Cantón -> Distritos
+    this.registerForm.get('canton')?.valueChanges.subscribe((rawCanton) => {
+      const idCanton = rawCanton !== null && rawCanton !== undefined ? Number(rawCanton) : null;
+      const idPais = this.registerForm.get('pais')?.value ? Number(this.registerForm.get('pais')?.value) : null;
+      const idProvincia = this.registerForm.get('provincia')?.value ? Number(this.registerForm.get('provincia')?.value) : null;
+
       this.distritos = [];
       this.registerForm.get('distrito')?.reset(null, { emitEvent: false });
 
-      const idPais = this.registerForm.get('pais')?.value;
-      const idProvincia = this.registerForm.get('provincia')?.value;
       if (idPais && idProvincia && idCanton) {
-        this.registerForm.get('distrito')?.enable({ emitEvent: false });
+        this.registerForm.get('distrito')?.enable();
+        this.registerForm.get('distrito')?.updateValueAndValidity();
         this.loadingDistritos = true;
         this.referenceDataService.getDistritos(idPais, idProvincia, idCanton).subscribe({
-          next: (data) => {
-            this.distritos = data;
-            this.loadingDistritos = false;
-          },
-          error: () => this.loadingDistritos = false
+          next: (data) => { this.distritos = data; this.loadingDistritos = false; },
+          error: () => { this.loadingDistritos = false; }
         });
       } else {
-        this.registerForm.get('distrito')?.disable({ emitEvent: false });
+        this.registerForm.get('distrito')?.disable();
+        this.registerForm.get('distrito')?.updateValueAndValidity();
+      }
+    });
+
+    // Distrito -> Código Postal (automático)
+    this.registerForm.get('distrito')?.valueChanges.subscribe((rawDistrito) => {
+      const idDistrito = rawDistrito !== null && rawDistrito !== undefined ? Number(rawDistrito) : null;
+
+      if (idDistrito) {
+        this.referenceDataService.getCodigoPostal(idDistrito).subscribe({
+          next: (data) => {
+            // Auto-fill código postal
+            this.registerForm.get('codigoPostal')?.setValue(data.codigo, { emitEvent: false });
+          },
+          error: (err) => console.error('Error loading código postal:', err)
+        });
+      } else {
+        // Clear código postal if distrito is cleared
+        this.registerForm.get('codigoPostal')?.setValue('', { emitEvent: false });
       }
     });
   }
@@ -510,7 +621,18 @@ export class RegisterComponent implements OnInit {
     this.registerForm.markAllAsTouched();
 
     if (this.registerForm.invalid) {
-      this.errorMessage = 'Por favor, completa todos los campos requeridos correctamente.';
+      // Get a list of invalid fields for debugging
+      const invalidFields = this.getInvalidFields();
+      console.error('Campos inválidos:', invalidFields);
+
+      // Show a detailed error message
+      if (invalidFields.length > 0) {
+        const fieldNames = invalidFields.map(f => this.getFieldLabel(f)).join(', ');
+        this.errorMessage = `Por favor, completa correctamente los siguientes campos: ${fieldNames}`;
+      } else {
+        this.errorMessage = 'Por favor, completa todos los campos requeridos correctamente.';
+      }
+
       // Expand sections with errors
       this.expandSectionsWithErrors();
       return;
@@ -519,41 +641,61 @@ export class RegisterComponent implements OnInit {
     this.isLoading = true;
     const formValue = this.registerForm.getRawValue();
 
-    // Build the DTO
+    // Log form value for debugging
+    console.log('Form value completo:', formValue);
+    console.log('Tipo identificador value:', formValue.tipoIdentificador, 'type:', typeof formValue.tipoIdentificador);
+
+    // Build the DTO with explicit number conversions
     const dto: RegistroCompletoDto = {
       usuario: {
         username: formValue.username,
         password: formValue.password
       },
       perfil: {
-        id_identificador: formValue.tipoIdentificador,
+        id_identificador: Number(formValue.tipoIdentificador),
         identificacion: formValue.identificacion,
         nombre: formValue.nombre,
         apellido_p: formValue.apellidoPaterno,
         apellido_m: formValue.apellidoMaterno || null,
         fecha_nacimiento: formValue.fechaNacimiento,
-        id_universidad: formValue.universidad || null,
+        id_universidad: formValue.universidad ? Number(formValue.universidad) : null,
         carrera: formValue.carrera || null
       },
       ubicacion: {
-        id_pais: formValue.pais,
-        id_provincia: formValue.provincia,
-        id_canton: formValue.canton,
-        id_distrito: formValue.distrito,
+        id_pais: Number(formValue.pais),
+        id_provincia: Number(formValue.provincia),
+        id_canton: Number(formValue.canton),
+        id_distrito: Number(formValue.distrito),
         direccion: formValue.direccion || null,
         codigo_postal: formValue.codigoPostal || null
       },
       correspondencia: this.buildCorrespondenciaArray(formValue)
     };
 
+    console.log('DTO construido:', dto);
+
     this.authService.register(dto).subscribe({
       next: (response) => {
         this.isLoading = false;
-        this.successMessage = response.mensaje || 'Usuario registrado exitosamente. Revisa tu correo para activar tu cuenta.';
+        this.successMessage = response.mensaje || 'Tu cuenta ha sido creada exitosamente.';
+
+        // Show success modal
+        this.showSuccessModal = true;
+
+        // Reset form after successful registration
+        this.registerForm.reset();
+
+
+        console.log('Registro exitoso:', response);
       },
       error: (error) => {
         this.isLoading = false;
         this.errorMessage = error.error?.mensaje || 'No se pudo crear la cuenta. Por favor, intenta nuevamente.';
+
+        // Scroll to top to see error message
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        console.error('Error en registro:', error);
       }
     });
   }
@@ -604,7 +746,58 @@ export class RegisterComponent implements OnInit {
     }
   }
 
+  private getInvalidFields(): string[] {
+    const invalid: string[] = [];
+    const controls = this.registerForm.controls;
+
+    Object.keys(controls).forEach(key => {
+      const control = controls[key];
+      if (control.invalid) {
+        // Check if it's disabled (disabled fields are still part of the form but shouldn't be validated)
+        if (!control.disabled) {
+          invalid.push(key);
+          // Log the specific errors for debugging
+          console.log(`Campo '${key}' inválido:`, control.errors);
+        }
+      }
+    });
+
+    return invalid;
+  }
+
+  private getFieldLabel(fieldName: string): string {
+    const labels: { [key: string]: string } = {
+      'username': 'Nombre de usuario',
+      'password': 'Contraseña',
+      'confirmPassword': 'Confirmar contraseña',
+      'tipoIdentificador': 'Tipo de identificación',
+      'identificacion': 'Número de identificación',
+      'nombre': 'Nombre',
+      'apellidoPaterno': 'Primer apellido',
+      'apellidoMaterno': 'Segundo apellido',
+      'fechaNacimiento': 'Fecha de nacimiento',
+      'email': 'Correo electrónico',
+      'universidad': 'Universidad',
+      'carrera': 'Carrera',
+      'pais': 'País',
+      'provincia': 'Provincia',
+      'canton': 'Cantón',
+      'distrito': 'Distrito',
+      'direccion': 'Dirección',
+      'codigoPostal': 'Código postal',
+      'correspondenciaAdicional': 'Correspondencia adicional'
+    };
+
+    return labels[fieldName] || fieldName;
+  }
+
   goToLogin(): void {
     this.router.navigate(['/login']);
+  }
+
+  closeSuccessModal(): void {
+    this.showSuccessModal = false;
+    // Redirect to home page
+    this.router.navigate(['/']);
   }
 }

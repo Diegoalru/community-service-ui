@@ -49,7 +49,7 @@ export class ForgotPasswordComponent {
         this.message = response.mensaje || 'Si el usuario está registrado, recibirás un mensaje con instrucciones para recuperar tu contraseña.';
       },
       error: () => {
-        // Always show a generic message for security (don't reveal if user exists)
+        // Always show a generic message for security (don't reveal if the user exists)
         this.isLoading = false;
         this.isSubmitted = true;
         this.message = 'Si el usuario está registrado, recibirás un mensaje con instrucciones para recuperar tu contraseña.';

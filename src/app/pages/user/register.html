@@ -85,7 +85,7 @@
                 <label for="tipoIdentificador">Tipo de identificación *</label>
                 <select id="tipoIdentificador" formControlName="tipoIdentificador">
                   <option [ngValue]="null" disabled>Selecciona...</option>
-                  <option *ngFor="let tipo of tiposIdentificador" [ngValue]="tipo.idTipoIdentificador">
+                  <option *ngFor="let tipo of tiposIdentificador" [ngValue]="tipo.idIdentificador">
                     {{ tipo.descripcion }}
                   </option>
                 </select>
@@ -211,7 +211,7 @@
                   <option [ngValue]="null" disabled>
                     {{ loadingProvincias ? 'Cargando...' : 'Selecciona...' }}
                   </option>
-                  <option *ngFor="let p of provincias" [ngValue]="p.idProvincia">
+                  <option *ngFor="let p of provincias" [ngValue]="p.id">
                     {{ p.nombre }}
                   </option>
                 </select>
@@ -225,7 +225,7 @@
                   <option [ngValue]="null" disabled>
                     {{ loadingCantones ? 'Cargando...' : 'Selecciona...' }}
                   </option>
-                  <option *ngFor="let c of cantones" [ngValue]="c.idCanton">
+                  <option *ngFor="let c of cantones" [ngValue]="c.id">
                     {{ c.nombre }}
                   </option>
                 </select>
@@ -237,7 +237,7 @@
                   <option [ngValue]="null" disabled>
                     {{ loadingDistritos ? 'Cargando...' : 'Selecciona...' }}
                   </option>
-                  <option *ngFor="let d of distritos" [ngValue]="d.idDistrito">
+                  <option *ngFor="let d of distritos" [ngValue]="d.id">
                     {{ d.nombre }}
                   </option>
                 </select>
@@ -380,5 +380,24 @@
       </ul>
     </aside>
 
+  </div>
+
+  <!-- Modal de éxito -->
+  <div *ngIf="showSuccessModal" class="modal-overlay" (click)="closeSuccessModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-icon success">
+        ✓
+      </div>
+      <h2>¡Cuenta creada exitosamente!</h2>
+      <p class="modal-message">{{ successMessage }}</p>
+      <p class="modal-instruction">
+        Por favor, revisa tu buzón de correo electrónico y sigue las instrucciones para activar tu cuenta.
+      </p>
+      <div class="modal-actions">
+        <button class="btn btn-primary" (click)="closeSuccessModal()">
+          Ir a inicio
+        </button>
+      </div>
+    </div>
   </div>
 </div>
