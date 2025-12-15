@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -76,6 +76,28 @@ import { AuthService } from '../../core/services/auth.service';
             </form>
           </div>
         </section>
+      </div>
+
+      <!-- Modal de éxito -->
+      <div *ngIf="showSuccessModal" class="modal-overlay" (click)="closeSuccessModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <div class="modal-icon success">
+            ✓
+          </div>
+          <h2>¡Contraseña actualizada!</h2>
+          <p class="modal-message">{{ successMessage }}</p>
+          <p class="modal-instruction">
+            Ya puedes iniciar sesión con tu nueva contraseña.
+          </p>
+          <div class="modal-actions">
+            <button class="btn btn-primary" (click)="goToLogin()">
+              Iniciar sesión
+            </button>
+            <button class="btn btn-ghost" (click)="closeSuccessModal()">
+              Ir a inicio
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   `,
@@ -172,6 +194,90 @@ import { AuthService } from '../../core/services/auth.service';
     .bullet {
       font-weight: bold;
     }
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      animation: fadeIn 0.3s ease;
+    }
+    .modal-content {
+      background: white;
+      padding: 2.5rem;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      animation: slideUp 0.3s ease;
+    }
+    .modal-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      margin: 0 auto 1.5rem;
+      font-weight: bold;
+    }
+    .modal-icon.success {
+      background: #d4edda;
+      color: #155724;
+    }
+    .modal-content h2 {
+      margin: 0 0 1rem;
+      color: #155724;
+    }
+    .modal-message {
+      color: #666;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+    .modal-instruction {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 6px;
+      color: #495057;
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .modal-actions .btn {
+      min-width: 150px;
+    }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+    @keyframes slideUp {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
   `]
 })
 export class ResetPasswordComponent implements OnInit {
@@ -181,12 +287,14 @@ export class ResetPasswordComponent implements OnInit {
   isSuccess = false;
   successMessage = '';
   errorMessage = '';
+  showSuccessModal = false;
 
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
   ) {
     this.form = this.fb.group({
       password: ['', [Validators.required, Validators.minLength(6)]],
@@ -221,14 +329,34 @@ export class ResetPasswordComponent implements OnInit {
     }).subscribe({
       next: (response) => {
         this.isLoading = false;
-        this.isSuccess = true;
         this.successMessage = response.mensaje || 'Tu contraseña ha sido restablecida exitosamente.';
+
+        // Show success modal instead of an inline message
+        this.showSuccessModal = true;
+
+        // Force change detection
+        this.cdr.detectChanges();
       },
       error: (error) => {
         this.isLoading = false;
         this.errorMessage = error.error?.mensaje || 'El enlace ha expirado o es inválido. Solicita uno nuevo.';
+
+        // Force change detection
+        this.cdr.detectChanges();
       }
     });
+  }
+
+  closeSuccessModal(): void {
+    this.showSuccessModal = false;
+    // Redirect to home page
+    this.router.navigate(['/']);
+  }
+
+  goToLogin(): void {
+    this.showSuccessModal = false;
+    // Redirect to login page
+    this.router.navigate(['/login']);
   }
 }
 
