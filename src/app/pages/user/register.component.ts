@@ -23,13 +23,13 @@ import {
 } from '../../shared/models/reference-data.dto';
 import { RegistroCompletoDto, CorrespondenciaRegDto } from '../../shared/models/auth.dto';
 
-// Custom validator for educational email
-function educationalEmailValidator(control: AbstractControl): ValidationErrors | null {
+// Email validator - accepts educational (.ac.cr, .ed.cr) and common domains (.com, .org, etc)
+function validEmailValidator(control: AbstractControl): ValidationErrors | null {
   const email = control.value;
   if (!email) return null;
-  // Match emails ending with .ac, .cr, .ed or containing these in domain
-  const pattern = /^[^\s@]+@[^\s@]+\.(ac|cr|ed|ac\.cr|edu)(\.[a-z]+)?$/i;
-  return pattern.test(email) ? null : { educationalEmail: true };
+  // Standard email pattern - accepts any valid email format
+  const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
+  return pattern.test(email) ? null : { invalidEmail: true };
 }
 
 @Component({
@@ -333,18 +333,19 @@ export class RegisterComponent implements OnInit {
 
   private initForm(): void {
     this.registerForm = this.fb.group({
-      // Sección Cuenta
-      email: ['', [Validators.required, Validators.email, educationalEmailValidator]],
+      // Sección Cuenta - USERNAME para iniciar sesión
+      username: ['', [Validators.required, Validators.maxLength(50)]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]],
 
-      // Sección Perfil
+      // Sección Perfil - incluye email
       tipoIdentificador: [null, Validators.required],
       identificacion: ['', [Validators.required, Validators.maxLength(50)]],
       nombre: ['', [Validators.required, Validators.maxLength(100)]],
       apellidoPaterno: ['', [Validators.required, Validators.maxLength(100)]],
       apellidoMaterno: ['', Validators.maxLength(100)],
       fechaNacimiento: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email, validEmailValidator]],
       universidad: [null],
       carrera: ['', Validators.maxLength(100)],
 
@@ -397,12 +398,14 @@ export class RegisterComponent implements OnInit {
       this.provincias = [];
       this.cantones = [];
       this.distritos = [];
-      this.registerForm.get('provincia')?.reset();
-      this.registerForm.get('canton')?.reset();
-      this.registerForm.get('distrito')?.reset();
+      this.registerForm.get('provincia')?.reset(null, { emitEvent: false });
+      this.registerForm.get('canton')?.reset(null, { emitEvent: false });
+      this.registerForm.get('distrito')?.reset(null, { emitEvent: false });
+      this.registerForm.get('canton')?.disable({ emitEvent: false });
+      this.registerForm.get('distrito')?.disable({ emitEvent: false });
 
       if (idPais) {
-        this.registerForm.get('provincia')?.enable();
+        this.registerForm.get('provincia')?.enable({ emitEvent: false });
         this.loadingProvincias = true;
         this.referenceDataService.getProvincias(idPais).subscribe({
           next: (data) => {
@@ -412,22 +415,21 @@ export class RegisterComponent implements OnInit {
           error: () => this.loadingProvincias = false
         });
       } else {
-        this.registerForm.get('provincia')?.disable();
+        this.registerForm.get('provincia')?.disable({ emitEvent: false });
       }
-      this.registerForm.get('canton')?.disable();
-      this.registerForm.get('distrito')?.disable();
     });
 
     // When province changes, load cantons
     this.registerForm.get('provincia')?.valueChanges.subscribe((idProvincia) => {
       this.cantones = [];
       this.distritos = [];
-      this.registerForm.get('canton')?.reset();
-      this.registerForm.get('distrito')?.reset();
+      this.registerForm.get('canton')?.reset(null, { emitEvent: false });
+      this.registerForm.get('distrito')?.reset(null, { emitEvent: false });
+      this.registerForm.get('distrito')?.disable({ emitEvent: false });
 
       const idPais = this.registerForm.get('pais')?.value;
       if (idPais && idProvincia) {
-        this.registerForm.get('canton')?.enable();
+        this.registerForm.get('canton')?.enable({ emitEvent: false });
         this.loadingCantones = true;
         this.referenceDataService.getCantones(idPais, idProvincia).subscribe({
           next: (data) => {
@@ -437,20 +439,19 @@ export class RegisterComponent implements OnInit {
           error: () => this.loadingCantones = false
         });
       } else {
-        this.registerForm.get('canton')?.disable();
+        this.registerForm.get('canton')?.disable({ emitEvent: false });
       }
-      this.registerForm.get('distrito')?.disable();
     });
 
     // When canton changes, load districts
     this.registerForm.get('canton')?.valueChanges.subscribe((idCanton) => {
       this.distritos = [];
-      this.registerForm.get('distrito')?.reset();
+      this.registerForm.get('distrito')?.reset(null, { emitEvent: false });
 
       const idPais = this.registerForm.get('pais')?.value;
       const idProvincia = this.registerForm.get('provincia')?.value;
       if (idPais && idProvincia && idCanton) {
-        this.registerForm.get('distrito')?.enable();
+        this.registerForm.get('distrito')?.enable({ emitEvent: false });
         this.loadingDistritos = true;
         this.referenceDataService.getDistritos(idPais, idProvincia, idCanton).subscribe({
           next: (data) => {
@@ -460,7 +461,7 @@ export class RegisterComponent implements OnInit {
           error: () => this.loadingDistritos = false
         });
       } else {
-        this.registerForm.get('distrito')?.disable();
+        this.registerForm.get('distrito')?.disable({ emitEvent: false });
       }
     });
   }
@@ -521,7 +522,7 @@ export class RegisterComponent implements OnInit {
     // Build the DTO
     const dto: RegistroCompletoDto = {
       usuario: {
-        username: formValue.email,
+        username: formValue.username,
         password: formValue.password
       },
       perfil: {
@@ -585,14 +586,14 @@ export class RegisterComponent implements OnInit {
     const controls = this.registerForm.controls;
 
     // Check cuenta section
-    if (controls['email']?.invalid || controls['password']?.invalid || controls['confirmPassword']?.invalid) {
+    if (controls['username']?.invalid || controls['password']?.invalid || controls['confirmPassword']?.invalid) {
       this.sections.cuenta = true;
     }
 
-    // Check perfil section
+    // Check perfil section (includes email now)
     if (controls['tipoIdentificador']?.invalid || controls['identificacion']?.invalid ||
         controls['nombre']?.invalid || controls['apellidoPaterno']?.invalid ||
-        controls['fechaNacimiento']?.invalid) {
+        controls['fechaNacimiento']?.invalid || controls['email']?.invalid) {
       this.sections.perfil = true;
     }
 
