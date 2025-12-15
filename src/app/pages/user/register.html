@@ -1,8 +1,8 @@
 <div class="page-auth">
-  <div class="login-wrapper">
+  <div class="register-wrapper">
 
     <!-- Panel izquierdo: formulario de registro -->
-    <section class="card">
+    <section class="card register-card">
       <h1>Crear cuenta</h1>
       <p class="subtitle">
         Completa la información para crear tu cuenta dentro del sistema de voluntariado.
@@ -10,78 +10,310 @@
 
       <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
 
-        <!-- Nombre -->
-        <div class="form-group">
-          <label for="nombre">Nombre completo</label>
-          <input
-            id="nombre"
-            type="text"
-            placeholder="Tu nombre completo"
-            formControlName="nombre"
-          />
+        <!-- ==================== SECCIÓN CUENTA ==================== -->
+        <div class="section">
+          <div class="section-header" (click)="toggleSection('cuenta')">
+            <h2>
+              <span class="toggle-icon">{{ sections.cuenta ? '▼' : '►' }}</span>
+              Cuenta
+            </h2>
+            <span class="section-badge required">Requerido</span>
+          </div>
+          <div class="section-content" *ngIf="sections.cuenta">
+            <div class="form-group">
+              <label for="email">Correo electrónico institucional *</label>
+              <input
+                id="email"
+                type="email"
+                placeholder="tu.correo@universidad.ac.cr"
+                formControlName="email"
+              />
+              <small class="hint">Debe ser un correo educativo (.ac.cr, .ed, etc.)</small>
+              <small *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.errors?.['required']" class="error-text">
+                El correo es requerido
+              </small>
+              <small *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.errors?.['email']" class="error-text">
+                Ingresa un correo válido
+              </small>
+              <small *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.errors?.['educationalEmail']" class="error-text">
+                Debe ser un correo educativo (ej: .ac.cr, .edu)
+              </small>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="password">Contraseña *</label>
+                <input
+                  id="password"
+                  type="password"
+                  placeholder="Mínimo 6 caracteres"
+                  formControlName="password"
+                />
+                <small *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.errors?.['required']" class="error-text">
+                  La contraseña es requerida
+                </small>
+                <small *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.errors?.['minlength']" class="error-text">
+                  Mínimo 6 caracteres
+                </small>
+              </div>
+
+              <div class="form-group">
+                <label for="confirmPassword">Confirmar contraseña *</label>
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="Repite tu contraseña"
+                  formControlName="confirmPassword"
+                />
+                <small *ngIf="registerForm.get('confirmPassword')?.touched && passwordMismatch" class="error-text">
+                  Las contraseñas no coinciden
+                </small>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <!-- Correo -->
-        <div class="form-group">
-          <label for="email">Correo electrónico</label>
-          <input
-            id="email"
-            type="email"
-            placeholder="tu.correo@universidad.ac.cr"
-            formControlName="email"
-          />
+        <!-- ==================== SECCIÓN DATOS PERSONALES ==================== -->
+        <div class="section">
+          <div class="section-header" (click)="toggleSection('perfil')">
+            <h2>
+              <span class="toggle-icon">{{ sections.perfil ? '▼' : '►' }}</span>
+              Datos Personales
+            </h2>
+            <span class="section-badge required">Requerido</span>
+          </div>
+          <div class="section-content" *ngIf="sections.perfil">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="tipoIdentificador">Tipo de identificación *</label>
+                <select id="tipoIdentificador" formControlName="tipoIdentificador">
+                  <option [ngValue]="null" disabled>Selecciona...</option>
+                  <option *ngFor="let tipo of tiposIdentificador" [ngValue]="tipo.idTipoIdentificador">
+                    {{ tipo.descripcion }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="identificacion">Número de identificación *</label>
+                <input
+                  id="identificacion"
+                  type="text"
+                  placeholder="Ej: 123456789"
+                  formControlName="identificacion"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="nombre">Nombre *</label>
+              <input
+                id="nombre"
+                type="text"
+                placeholder="Tu nombre"
+                formControlName="nombre"
+              />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="apellidoPaterno">Primer apellido *</label>
+                <input
+                  id="apellidoPaterno"
+                  type="text"
+                  placeholder="Apellido paterno"
+                  formControlName="apellidoPaterno"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="apellidoMaterno">Segundo apellido</label>
+                <input
+                  id="apellidoMaterno"
+                  type="text"
+                  placeholder="Apellido materno (opcional)"
+                  formControlName="apellidoMaterno"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="fechaNacimiento">Fecha de nacimiento *</label>
+              <input
+                id="fechaNacimiento"
+                type="date"
+                formControlName="fechaNacimiento"
+              />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="universidad">Universidad</label>
+                <select id="universidad" formControlName="universidad">
+                  <option [ngValue]="null">Selecciona (opcional)...</option>
+                  <option *ngFor="let uni of universidades" [ngValue]="uni.idUniversidad">
+                    {{ uni.siglas ? uni.siglas + ' - ' : '' }}{{ uni.nombre }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="carrera">Carrera</label>
+                <input
+                  id="carrera"
+                  type="text"
+                  placeholder="Tu carrera (opcional)"
+                  formControlName="carrera"
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
-        <!-- Teléfono -->
-        <div class="form-group">
-          <label for="telefono">Teléfono</label>
-          <input
-            id="telefono"
-            type="text"
-            placeholder="8888-8888"
-            formControlName="telefono"
-          />
+        <!-- ==================== SECCIÓN UBICACIÓN ==================== -->
+        <div class="section">
+          <div class="section-header" (click)="toggleSection('ubicacion')">
+            <h2>
+              <span class="toggle-icon">{{ sections.ubicacion ? '▼' : '►' }}</span>
+              Ubicación
+            </h2>
+            <span class="section-badge required">Requerido</span>
+          </div>
+          <div class="section-content" *ngIf="sections.ubicacion">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="pais">País *</label>
+                <select id="pais" formControlName="pais">
+                  <option [ngValue]="null" disabled>Selecciona...</option>
+                  <option *ngFor="let p of paises" [ngValue]="p.idPais">
+                    {{ p.nombre }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="provincia">Provincia *</label>
+                <select id="provincia" formControlName="provincia">
+                  <option [ngValue]="null" disabled>
+                    {{ loadingProvincias ? 'Cargando...' : 'Selecciona...' }}
+                  </option>
+                  <option *ngFor="let p of provincias" [ngValue]="p.idProvincia">
+                    {{ p.nombre }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="canton">Cantón *</label>
+                <select id="canton" formControlName="canton">
+                  <option [ngValue]="null" disabled>
+                    {{ loadingCantones ? 'Cargando...' : 'Selecciona...' }}
+                  </option>
+                  <option *ngFor="let c of cantones" [ngValue]="c.idCanton">
+                    {{ c.nombre }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="distrito">Distrito *</label>
+                <select id="distrito" formControlName="distrito">
+                  <option [ngValue]="null" disabled>
+                    {{ loadingDistritos ? 'Cargando...' : 'Selecciona...' }}
+                  </option>
+                  <option *ngFor="let d of distritos" [ngValue]="d.idDistrito">
+                    {{ d.nombre }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-2">
+                <label for="direccion">Dirección</label>
+                <input
+                  id="direccion"
+                  type="text"
+                  placeholder="Dirección exacta (opcional)"
+                  formControlName="direccion"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="codigoPostal">Código postal</label>
+                <input
+                  id="codigoPostal"
+                  type="text"
+                  placeholder="Ej: 10101"
+                  formControlName="codigoPostal"
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
-        <!-- Contraseña -->
-        <div class="form-group">
-          <label for="password">Contraseña</label>
-          <input
-            id="password"
-            type="password"
-            placeholder="Crea una contraseña"
-            formControlName="password"
-          />
-        </div>
+        <!-- ==================== SECCIÓN CORRESPONDENCIA ADICIONAL ==================== -->
+        <div class="section">
+          <div class="section-header" (click)="toggleSection('correspondencia')">
+            <h2>
+              <span class="toggle-icon">{{ sections.correspondencia ? '▼' : '►' }}</span>
+              Correspondencia Adicional
+            </h2>
+            <span class="section-badge optional">Opcional</span>
+          </div>
+          <div class="section-content" *ngIf="sections.correspondencia">
+            <p class="section-description">
+              Agrega información de contacto adicional como teléfono, WhatsApp, fax, etc.
+            </p>
 
-        <!-- Confirmar contraseña -->
-        <div class="form-group">
-          <label for="confirmPassword">Confirmar contraseña</label>
-          <input
-            id="confirmPassword"
-            type="password"
-            placeholder="Repite tu contraseña"
-            formControlName="confirmPassword"
-          />
-        </div>
+            <div formArrayName="correspondenciaAdicional">
+              <div *ngFor="let item of correspondenciaAdicional.controls; let i = index"
+                   [formGroupName]="i"
+                   class="correspondencia-item">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Tipo *</label>
+                    <select formControlName="tipoCorrespondencia">
+                      <option [ngValue]="null" disabled>Selecciona...</option>
+                      <option *ngFor="let tipo of tiposCorrespondenciaFiltrados"
+                              [ngValue]="tipo.idTipoCorrespondencia">
+                        {{ tipo.descripcion }}
+                      </option>
+                    </select>
+                  </div>
 
-        <!-- Acciones -->
-        <div class="actions">
-          <a
-            class="btn btn-ghost btn-small"
-            (click)="goToLogin()"
-          >
-            ¿Ya tienes cuenta? Inicia sesión
-          </a>
+                  <div class="form-group flex-2">
+                    <label>Valor *</label>
+                    <input
+                      type="text"
+                      placeholder="Ej: 8888-8888"
+                      formControlName="valor"
+                    />
+                  </div>
 
-          <div>
-            <button type="submit" class="btn btn-primary">
-              Crear cuenta
+                  <div class="form-group checkbox-group">
+                    <label class="checkbox-label">
+                      <input type="checkbox" formControlName="consentimiento" />
+                      Acepto recibir notificaciones
+                    </label>
+                  </div>
+
+                  <button type="button" class="btn btn-icon btn-danger" (click)="removeCorrespondencia(i)">
+                    ✕
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-ghost btn-small" (click)="addCorrespondencia()">
+              + Agregar contacto
             </button>
           </div>
         </div>
 
-        <!-- Errores -->
+        <!-- ==================== MENSAJES Y ACCIONES ==================== -->
         <div *ngIf="errorMessage" class="alert alert-error">
           <div class="bullet">!</div>
           <div>
@@ -90,15 +322,23 @@
           </div>
         </div>
 
-        <!-- Mensaje de éxito -->
-        <div *ngIf="successMessage" class="alert alert-info">
-          <div class="bullet">i</div>
+        <div *ngIf="successMessage" class="alert alert-success">
+          <div class="bullet">✓</div>
           <div>
-            <strong>Cuenta creada exitosamente.</strong><br />
+            <strong>¡Cuenta creada exitosamente!</strong><br />
             {{ successMessage }}
           </div>
         </div>
 
+        <div class="actions">
+          <a class="btn btn-ghost" (click)="goToLogin()">
+            ¿Ya tienes cuenta? Inicia sesión
+          </a>
+
+          <button type="submit" class="btn btn-primary" [disabled]="isLoading">
+            {{ isLoading ? 'Creando cuenta...' : 'Crear cuenta' }}
+          </button>
+        </div>
       </form>
     </section>
 
@@ -119,8 +359,8 @@
 
       <span class="label-tag">Requisitos</span>
       <ul class="steps">
-        <li>Correo válido de contacto.</li>
-        <li>Contraseña con nivel adecuado de seguridad.</li>
+        <li>Correo institucional válido (.ac.cr, .ed, etc.)</li>
+        <li>Contraseña con mínimo 6 caracteres.</li>
         <li>Información personal verídica para confirmar identidad.</li>
       </ul>
     </aside>
