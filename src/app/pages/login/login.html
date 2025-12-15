@@ -12,12 +12,12 @@
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
         <!-- Correo -->
         <div class="form-group">
-          <label for="email">Correo electrónico</label>
+          <label for="usuario">Usuario</label>
           <input
-            id="email"
-            type="email"
-            placeholder="tu.correo@ulacit.ac.cr"
-            formControlName="email"
+            id="usuario"
+            type="text"
+            placeholder="Ingresa tu usuario"
+            formControlName="usuario"
           />
           <span class="help-text">
             Debe corresponder a una cuenta registrada y activa en el sistema.

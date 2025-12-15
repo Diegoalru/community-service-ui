@@ -26,7 +26,7 @@ export class  LoginComponent {
     private authService: AuthService
   ) {
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      usuario: ['', [Validators.required]],
       password: ['', [Validators.required]],
     });
 
@@ -44,9 +44,9 @@ export class  LoginComponent {
     }
 
     this.isLoading = true;
-    const { email, password } = this.loginForm.value;
+    const { usuario, password } = this.loginForm.value;
 
-    this.authService.login({ username: email, password }).subscribe({
+    this.authService.login({ username: usuario, password }).subscribe({
       next: (response) => {
         this.isLoading = false;
         this.infoMessage = response.mensaje || 'Inicio de sesión exitoso';
@@ -69,14 +69,14 @@ export class  LoginComponent {
   }
 
   onResendActivation(): void {
-    const email = this.loginForm.get('email')?.value;
-    if (!email) {
-      this.errorMessage = 'Ingresa tu correo electrónico para reenviar la activación.';
+    const usuario = this.loginForm.get('usuario')?.value;
+    if (!usuario) {
+      this.errorMessage = 'Ingresa tu usuario para reenviar la activación.';
       return;
     }
 
     this.isLoading = true;
-    this.authService.resendActivation({ username: email }).subscribe({
+    this.authService.resendActivation({ username: usuario }).subscribe({
       next: (response) => {
         this.isLoading = false;
         this.infoMessage = response.mensaje || 'Si el correo está registrado, recibirás un nuevo enlace de activación.';
