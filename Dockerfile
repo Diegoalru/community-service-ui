@@ -36,7 +36,7 @@ COPY nginx/nginx.conf.template /etc/nginx/conf.d/default.conf.template
 EXPOSE 80
 
 # Health check to ensure the server is responsive.
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=1m --timeout=20s --start-period=30s --retries=5 \
   CMD curl -f http://localhost/ || exit 1
 
 # When the container starts, substitute the environment variables in the template
