@@ -17,6 +17,13 @@ server {
     proxy_set_header X-Forwarded-Proto $scheme;
   }
 
+  # If someone requests hidden files (.git, .env, etc), block them immediately.
+  location ~ /\.(?!well-known) {
+      deny all;
+      access_log off;
+      log_not_found off;
+    }
+
   location ~* \.(?:css|js|ico|png|jpg|jpeg|gif|svg|woff2?)$ {
     try_files $uri =404;
     expires 1y;
