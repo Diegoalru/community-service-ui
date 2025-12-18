@@ -79,6 +79,13 @@ import { AuthService } from '../../../core/services/auth.service';
                 >
                   Certificados
                 </a>
+                  <a
+                  routerLink="/administration"
+                  routerLinkActive="bg-slate-100"
+                  class="block rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                >
+                  Modulo Administrador
+                </a>
               </div>
             </details>
           </ng-container>

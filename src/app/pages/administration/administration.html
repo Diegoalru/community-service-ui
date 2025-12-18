@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+
+  <meta charset="UTF-8" />
+
+  <title>Administrar roles de usuario · Panel Administrador</title>
+
+  <style>
+
+    * { box-sizing: border-box; }
+
+
+
+    body {
+
+      margin: 0;
+
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+      background: #f3f4f6;
+
+      color: #111827;
+
+    }
+
+
+
+    .layout {
+
+      min-height: 100vh;
+
+      display: grid;
+
+      grid-template-rows: auto 1fr;
+
+    }
+
+
+
+    header {
+
+      background: #111827;
+
+      color: #f9fafb;
+
+      padding: 0.9rem 1.7rem;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between;
+
+    }
+
+
+
+    header h1 {
+
+      margin: 0;
+
+      font-size: 1.15rem;
+
+    }
+
+
+
+    header span {
+
+      font-size: 0.8rem;
+
+      color: #9ca3af;
+
+    }
+
+
+
+    main {
+
+      padding: 1.5rem;
+
+      max-width: 1180px;
+
+      margin: 0 auto;
+
+    }
+
+
+
+    .page-title {
+
+      margin: 0 0 0.25rem;
+
+      font-size: 1.3rem;
+
+      color: #111827;
+
+    }
+
+
+
+    .page-subtitle {
+
+      margin: 0 0 1rem;
+
+      font-size: 0.9rem;
+
+      color: #6b7280;
+
+    }
+
+
+
+    .grid {
+
+      display: grid;
+
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+
+      gap: 1rem;
+
+    }
+
+
+
+    .card {
+
+      background: #ffffff;
+
+      border-radius: 14px;
+
+      padding: 1rem 1.2rem;
+
+      box-shadow: 0 10px 25px rgba(15,23,42,0.08);
+
+      border: 1px solid #e5e7eb;
+
+    }
+
+
+
+    h2 {
+
+      margin: 0 0 0.6rem;
+
+      font-size: 1rem;
+
+      color: #111827;
+
+    }
+
+
+
+    /* Filtros */
+
+    .filters {
+
+      display: grid;
+
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+
+      gap: 0.6rem;
+
+      margin-bottom: 0.8rem;
+
+      margin-top: 0.2rem;
+
+    }
+
+
+
+    .form-group {
+
+      display: flex;
+
+      flex-direction: column;
+
+      font-size: 0.8rem;
+
+    }
+
+
+
+    label {
+
+      margin-bottom: 0.2rem;
+
+      font-weight: 600;
+
+      color: #374151;
+
+    }
+
+
+
+    input, select {
+
+      padding: 0.4rem 0.5rem;
+
+      border-radius: 10px;
+
+      border: 1px solid #d1d5db;
+
+      font-size: 0.85rem;
+
+      outline: none;
+
+      background: #f9fafb;
+
+      transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+
+    }
+
+
+
+    input:focus, select:focus {
+
+      border-color: #2563eb;
+
+      background: #ffffff;
+
+      box-shadow: 0 0 0 1px rgba(37,99,235,0.18);
+
+    }
+
+
+
+    .btn {
+
+      border-radius: 999px;
+
+      padding: 0.4rem 1.1rem;
+
+      font-size: 0.8rem;
+
+      border: none;
+
+      cursor: pointer;
+
+      display: inline-flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      gap: 0.3rem;
+
+    }
+
+
+
+    .btn-outline {
+
+      background: #ffffff;
+
+      color: #111827;
+
+      border: 1px solid #d1d5db;
+
+    }
+
+
+
+    .btn-primary {
+
+      background: #2563eb;
+
+      color: #ffffff;
+
+    }
+
+
+
+    .filters-actions {
+
+      margin-top: 0.4rem;
+
+      display: flex;
+
+      justify-content: flex-end;
+
+      gap: 0.5rem;
+
+    }
+
+
+
+    /* Tabla de usuarios */
+
+    table {
+
+      width: 100%;
+
+      border-collapse: collapse;
+
+      font-size: 0.82rem;
+
+      margin-top: 0.6rem;
+
+    }
+
+
+
+    th, td {
+
+      padding: 0.45rem 0.4rem;
+
+      border-bottom: 1px solid #e5e7eb;
+
+      text-align: left;
+
+    }
+
+
+
+    th {
+
+      background: #f3f4f6;
+
+      font-weight: 600;
+
+      color: #4b5563;
+
+      font-size: 0.8rem;
+
+    }
+
+
+
+    tr:last-child td {
+
+      border-bottom: none;
+
+    }
+
+
+
+    tr:hover td {
+
+      background: #f9fafb;
+
+    }
+
+
+
+    .tag-role {
+
+      display: inline-block;
+
+      padding: 0.1rem 0.5rem;
+
+      border-radius: 999px;
+
+      font-size: 0.7rem;
+
+      background: #e0f2fe;
+
+      color: #0369a1;
+
+      margin-right: 0.2rem;
+
+    }
+
+
+
+    .chip-pill {
+
+      display: inline-block;
+
+      padding: 0.1rem 0.55rem;
+
+      border-radius: 999px;
+
+      font-size: 0.7rem;
+
+      background: #eef2ff;
+
+      color: #3730a3;
+
+      margin-right: 0.3rem;
+
+      margin-top: 0.2rem;
+
+    }
+
+
+
+    /* Panel de detalle */
+
+    .detail-header {
+
+      margin-bottom: 0.6rem;
+
+    }
+
+
+
+    .detail-header p {
+
+      margin: 0.05rem 0;
+
+      font-size: 0.82rem;
+
+      color: #4b5563;
+
+    }
+
+
+
+    .role-checkboxes label {
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 0.35rem;
+
+      font-size: 0.82rem;
+
+      font-weight: 500;
+
+      margin-bottom: 0.3rem;
+
+    }
+
+
+
+    .role-checkboxes input[type="checkbox"] {
+
+      width: 14px;
+
+      height: 14px;
+
+    }
+
+
+
+    .detail-actions {
+
+      display: flex;
+
+      justify-content: flex-end;
+
+      gap: 0.6rem;
+
+      margin-top: 0.6rem;
+
+    }
+
+
+
+    .alert {
+
+      border-radius: 10px;
+
+      padding: 0.55rem 0.75rem;
+
+      font-size: 0.78rem;
+
+      margin-top: 0.6rem;
+
+      display: flex;
+
+      gap: 0.45rem;
+
+      align-items: flex-start;
+
+    }
+
+
+
+    .alert strong {
+
+      font-weight: 600;
+
+    }
+
+
+
+    .alert-error {
+
+      background: #fef2f2;
+
+      border: 1px solid #fecaca;
+
+      color: #b91c1c;
+
+    }
+
+
+
+    .alert-info {
+
+      background: #eff6ff;
+
+      border: 1px solid #bfdbfe;
+
+      color: #1d4ed8;
+
+    }
+
+
+
+    .bullet {
+
+      font-size: 1.1rem;
+
+      margin-top: 0.1rem;
+
+    }
+
+
+
+    .log-box {
+
+      margin-top: 0.7rem;
+
+      padding: 0.55rem 0.65rem;
+
+      border-radius: 10px;
+
+      background: #f9fafb;
+
+      border: 1px dashed #e5e7eb;
+
+      font-size: 0.75rem;
+
+      color: #6b7280;
+
+    }
+
+
+
+    @media (max-width: 960px) {
+
+      .grid {
+
+        grid-template-columns: 1fr;
+
+      }
+
+    }
+
+
+
+    @media (max-width: 720px) {
+
+      main {
+
+        padding: 1rem;
+
+      }
+
+      .filters {
+
+        grid-template-columns: 1fr;
+
+      }
+
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <div class="layout">
+
+    <header>
+
+      <div>
+
+        <h1>Panel de Administración</h1>
+
+        <span>Gestión de usuarios y roles</span>
+
+      </div>
+
+      <div style="font-size:0.8rem;">
+
+        Administrador autenticado: <strong>admin@universidad.ac.cr</strong>
+
+      </div>
+
+    </header>
+
+
+
+    <main>
+
+      <h2 class="page-title">Administrar roles de usuario</h2>
+
+      <p class="page-subtitle">
+
+        Asigna, modifica o revoca los roles de los usuarios registrados en el sistema de voluntariado.
+
+      </p>
+
+
+
+      <div class="grid">
+
+        <!-- Columna izquierda: listado de usuarios + filtros -->
+
+        <section class="card">
+
+          <h2>Listado de usuarios</h2>
+
+
+
+          <div class="filters">
+
+            <div class="form-group">
+
+              <label for="f-nombre">Nombre</label>
+
+              <input id="f-nombre" type="text" placeholder="Buscar por nombre..." />
+
+            </div>
+
+            <div class="form-group">
+
+              <label for="f-correo">Correo</label>
+
+              <input id="f-correo" type="text" placeholder="Buscar por correo..." />
+
+            </div>
+
+            <div class="form-group">
+
+              <label for="f-rol">Rol</label>
+
+              <select id="f-rol">
+
+                <option value="">Todos</option>
+
+                <option>Voluntario</option>
+
+                <option>Coordinador</option>
+
+                <option>Administrador</option>
+
+              </select>
+
+            </div>
+
+          </div>
+
+
+
+          <div class="filters-actions">
+
+            <button class="btn btn-outline" type="button">Limpiar filtros</button>
+
+            <button class="btn btn-primary" type="button">Aplicar filtros</button>
+
+          </div>
+
+
+
+          <table>
+
+            <thead>
+
+              <tr>
+
+                <th>Nombre</th>
+
+                <th>Correo</th>
+
+                <th>Roles</th>
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              <tr>
+
+                <td>Ana Pérez</td>
+
+                <td>ana.perez@uni.ac.cr</td>
+
+                <td>
+
+                  <span class="tag-role">Voluntario</span>
+
+                </td>
+
+              </tr>
+
+              <tr>
+
+                <td>Carlos López</td>
+
+                <td>carlos.lopez@uni.ac.cr</td>
+
+                <td>
+
+                  <span class="tag-role">Voluntario</span>
+
+                  <span class="tag-role">Coordinador</span>
+
+                </td>
+
+              </tr>
+
+              <tr>
+
+                <td>Admin General</td>
+
+                <td>admin@uni.ac.cr</td>
+
+                <td>
+
+                  <span class="tag-role">Administrador</span>
+
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </section>
+
+
+
+        <!-- Columna derecha: detalle del usuario seleccionado + edición de roles -->
+
+        <section class="card">
+
+          <h2>Detalle del usuario seleccionado</h2>
+
+
+
+          <div class="detail-header">
+
+            <p><strong>Usuario:</strong> Carlos López</p>
+
+            <p><strong>Correo:</strong> carlos.lopez@uni.ac.cr</p>
+
+            <p><strong>Roles actuales:</strong></p>
+
+            <div>
+
+              <span class="chip-pill">Voluntario</span>
+
+              <span class="chip-pill">Coordinador</span>
+
+            </div>
+
+          </div>
+
+
+
+          <div class="form-group">
+
+            <label>Modificar roles asignados</label>
+
+            <div class="role-checkboxes">
+
+              <label>
+
+                <input type="checkbox" checked />
+
+                Voluntario
+
+              </label>
+
+              <label>
+
+                <input type="checkbox" checked />
+
+                Coordinador
+
+              </label>
+
+              <label>
+
+                <input type="checkbox" />
+
+                Administrador
+
+              </label>
+
+            </div>
+
+          </div>
+
+
+
+          <div class="detail-actions">
+
+            <button class="btn btn-outline" type="button">Cancelar</button>
+
+            <button class="btn btn-primary" type="button">Guardar cambios</button>
+
+          </div>
+
+
+
+          <!-- Ejemplo de log de acción luego de guardar -->
+
+          <div class="log-box">
+
+            Última acción registrada:<br />
+
+            12/11/2025 09:45 · admin@universidad.ac.cr cambió roles de carlos.lopez@uni.ac.cr:
+
+            agregó rol <strong>Coordinador</strong>, mantuvo <strong>Voluntario</strong>.
+
+          </div>
+
+
+
+          <!-- Flujo alterno A1 – Intento de eliminar el último administrador -->
+
+          <div class="alert alert-error">
+
+            <div class="bullet">!</div>
+
+            <div>
+
+              <strong>No se puede eliminar el último administrador.</strong><br />
+
+              Esta acción está bloqueada porque el sistema requiere al menos un usuario con rol
+
+              <strong>Administrador</strong>. Asigna primero este rol a otro usuario antes de retirarlo aquí.
+
+            </div>
+
+          </div>
+
+
+
+          <!-- Mensaje informativo general -->
+
+          <div class="alert alert-info">
+
+            <div class="bullet">i</div>
+
+            <div>
+
+              Los cambios de roles se aplicarán en los próximos inicios de sesión de los usuarios.
+
+              Sus paneles se actualizarán automáticamente según los roles vigentes.
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </div>
+
+    </main>
+
+  </div>
+
+</body>
+
+</html>
