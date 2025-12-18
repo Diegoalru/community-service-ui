@@ -11,6 +11,7 @@ import { OrganizationsComponent } from './pages/organizations/organizations.comp
 import { ProfileComponent } from './pages/profile/profile.component';
 import { MyHoursComponent } from './pages/my-hours/my-hours.component';
 import { CertificatesComponent } from './pages/certificates/certificates.component';
+import { AdministrationComponent } from './pages/administration/administration.component';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent },
@@ -24,6 +25,7 @@ export const routes: Routes = [
   { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
   { path: 'my-hours', component: MyHoursComponent, canActivate: [authGuard] },
   { path: 'certificates', component: CertificatesComponent, canActivate: [authGuard] },
+  { path: 'administration', component: AdministrationComponent, canActivate: [authGuard] },
   // ... existing routes above ...
   { path: '**', redirectTo: '' }, // or redirectTo: '/',
 ];
