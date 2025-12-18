@@ -8,4 +8,28 @@ import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angula
   templateUrl: './administration.html',
   styleUrls: ['./administration.css'],
 })
-export class AdministrationComponent {}
+export class AdministrationComponent {
+  isModalOpen = false;
+  modalTitle = 'Confirmación';
+  modalMessage = 'Inscripción exitosa.';
+    // Tabla / acciones
+  private savingIds = new Set<number>();
+
+
+
+
+
+
+   openModal(title: string, message: string): void {
+    this.modalTitle = title;
+    this.modalMessage = message;
+    this.isModalOpen = true;
+  }
+
+ 
+
+   closeModal(): void {
+    this.isModalOpen = false;
+  }
+
+}
