@@ -1,7 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { EventDto } from '../../models/EventRow';
+import {
+  EventDto,
+  type InscribirUsuarioActividadRequestDto,
+  type InscripcionActividadResponseDto,
+  type DesinscripcionActividadResponseDto,
+} from '../../models/EventRow';
 
 @Injectable({ providedIn: 'root' })
 export class EventsService {
@@ -10,8 +15,21 @@ export class EventsService {
 
   constructor(private http: HttpClient) {}
 
-  getEvents(): Observable<EventDto[]> {
-    return this.http.get<EventDto[]>(`${this.baseUrl}/Actividades`);
+  getEvents(idUsuario: number): Observable<EventDto[]> {
+    return this.http.get<EventDto[]>(`${this.baseUrl}/Actividades/available-activities?idUsuario=${idUsuario}`);
+  }
+
+  inscribirUsuarioActividad(dto: InscribirUsuarioActividadRequestDto): Observable<InscripcionActividadResponseDto> {
+    return this.http.post<InscripcionActividadResponseDto>(`${this.baseUrl}/Actividades/inscribir-usuario`, dto);
+  }
+
+  desinscribirUsuarioActividad(
+    dto: InscribirUsuarioActividadRequestDto
+  ): Observable<DesinscripcionActividadResponseDto> {
+    return this.http.post<DesinscripcionActividadResponseDto>(
+      `${this.baseUrl}/Actividades/desinscribir-usuario`,
+      dto
+    );
   }
 
   /**

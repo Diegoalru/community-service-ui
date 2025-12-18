@@ -22,9 +22,14 @@
       <p class="text-sm text-slate-600">No hay eventos disponibles por el momento.</p>
     </div>
 
-    <div *ngIf="!isLoading && !isEmpty" class="overflow-x-auto">
+    <div
+      *ngIf="!isLoading && !isEmpty"
+      class="max-h-[70vh] overflow-x-auto overflow-y-auto"
+    >
       <table class="min-w-full text-left text-sm">
-        <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600">
+        <thead
+          class="sticky top-0 z-10 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600"
+        >
           <tr>
             <th class="whitespace-nowrap px-4 py-3">Nombre evento</th>
             <th class="whitespace-nowrap px-4 py-3">Cupo</th>
@@ -48,6 +53,7 @@
             <td class="px-4 py-3 text-slate-700">{{ row.organizacion }}</td>
             <td class="px-4 py-3 text-slate-700">{{ row.nombreCoordinador }}</td>
             <td class="px-4 py-3 text-right">
+              <div class="flex justify-end gap-2">
               <button
                 type="button"
                 class="inline-flex items-center justify-center rounded-md px-3 py-2 text-xs font-semibold transition
@@ -58,11 +64,30 @@
                 [class.bg-slate-200]="isRegistered(row.id)"
                 [class.text-slate-600]="isRegistered(row.id)"
                 [class.cursor-not-allowed]="isRegistered(row.id)"
-                [disabled]="isRegistered(row.id)"
+                [class.opacity-70]="isRegistering(row.id) || isUnregistering(row.id)"
+                [disabled]="isRegistered(row.id) || isRegistering(row.id) || isUnregistering(row.id)"
                 (click)="onRegister(row)"
               >
-                {{ isRegistered(row.id) ? 'Inscrito' : 'Inscribirse' }}
+                {{ isRegistered(row.id) ? 'Inscrito' : (isRegistering(row.id) ? 'Inscribiendo...' : 'Inscribirse') }}
               </button>
+
+              <button
+                type="button"
+                class="inline-flex items-center justify-center rounded-md px-3 py-2 text-xs font-semibold transition
+                  focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-600 focus-visible:ring-offset-2"
+                [class.bg-rose-600]="isRegistered(row.id)"
+                [class.text-white]="isRegistered(row.id)"
+                [class.hover:bg-rose-700]="isRegistered(row.id)"
+                [class.bg-slate-200]="!isRegistered(row.id)"
+                [class.text-slate-600]="!isRegistered(row.id)"
+                [class.cursor-not-allowed]="!isRegistered(row.id)"
+                [class.opacity-70]="isRegistering(row.id) || isUnregistering(row.id)"
+                [disabled]="!isRegistered(row.id) || isRegistering(row.id) || isUnregistering(row.id)"
+                (click)="onUnregister(row)"
+              >
+                {{ isUnregistering(row.id) ? 'Desinscribiendo...' : 'Desinscribirse' }}
+              </button>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -87,7 +112,7 @@
     <div class="flex items-start justify-between gap-4">
       <div>
         <h3 class="text-base font-semibold text-slate-900">{{ modalTitle }}</h3>
-        <p class="mt-1 text-sm text-slate-600">{{ modalMessage }}</p>
+        <p class="mt-1 whitespace-pre-line text-sm text-slate-600">{{ modalMessage }}</p>
       </div>
       <button
         type="button"

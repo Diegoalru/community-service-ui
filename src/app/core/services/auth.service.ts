@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { ApiService } from './api.service';
 import {
   UsuarioLoginDto,
@@ -15,6 +15,10 @@ import {
 export class AuthService {
   private readonly TOKEN_KEY = 'auth_token';
   private readonly USER_ID_KEY = 'user_id';
+
+  private readonly loggedInSubject = new BehaviorSubject<boolean>(this.isAuthenticated());
+  /** Emite `true/false` cuando cambia el estado de autenticación. */
+  readonly loggedIn$ = this.loggedInSubject.asObservable();
 
   constructor(private api: ApiService) {}
 
@@ -38,11 +42,13 @@ export class AuthService {
     if (userId) {
       sessionStorage.setItem(this.USER_ID_KEY, String(userId));
     }
+    this.loggedInSubject.next(true);
   }
 
   logout(): void {
     sessionStorage.removeItem(this.TOKEN_KEY);
     sessionStorage.removeItem(this.USER_ID_KEY);
+    this.loggedInSubject.next(false);
   }
 
   // Auth endpoints
