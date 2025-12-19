@@ -70,11 +70,11 @@
                   <tr *ngFor="let usuario of filteredUsuarios" (click)="seleccionarUsuario(usuario)" class="cursor-pointer hover:bg-slate-50/60" [class.bg-blue-50]="usuarioSeleccionado?.idUsuario === usuario.idUsuario">
                     <td class="px-4 py-3"><p class="font-medium text-slate-900">{{ usuario.nombre || usuario.username }}</p><p class="text-xs text-slate-500">{{ usuario.username }}</p></td>
                   <td class="px-4 py-3">
-                    <!-- Si es Voluntario (Rol 4) -->
-                    <div *ngIf="usuario.idRol === 4; else rolDropdown">
-                      <span class="text-sm font-medium text-slate-700">Voluntario</span>
+                    <!-- Si es Admin, Coordinador o Asistente, mostrar texto -->
+                    <div *ngIf="isAdministrativeUser(usuario); else rolDropdown">
+                      <span class="text-sm font-medium text-slate-700">{{ getNombreRol(usuario.idRol) }}</span>
                     </div>
-                    <!-- Para otros roles, mostrar dropdown -->
+                    <!-- Si es Voluntario, mostrar dropdown -->
                     <ng-template #rolDropdown>
                       <select
                         class="rounded border border-slate-300 bg-white px-2 py-1 text-xs"

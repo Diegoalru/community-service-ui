@@ -256,6 +256,10 @@ export class AdministrationComponent implements OnInit, OnDestroy {
     this.usuarioSeleccionado = usuario;
   }
 
+  isAdministrativeUser(usuario: UsuarioDeOrganizacion): boolean {
+    return [1, 2, 3].includes(usuario.idRol);
+  }
+
   cambiarRolUsuario(usuario: UsuarioDeOrganizacion, nuevoRolId: number): void {
     if (usuario.idRol === nuevoRolId) return;
     const idUsuarioSolicitante = this.authService.getUserId();
