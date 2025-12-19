@@ -1,224 +1,199 @@
-<div class="mx-auto max-w-6xl px-6 py-8">
-  <!-- Header de página -->
-  <div class="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-    <div>
-      <h1 class="text-2xl font-semibold text-slate-900">Panel de Administración</h1>
-      <p class="mt-1 text-sm text-slate-600">Gestión de usuarios y roles</p>
-    </div>
+<!-- Header de página -->
+<div class="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+  <div>
+    <h1 class="text-2xl font-semibold text-slate-900">Panel de Administración</h1>
+    <p class="mt-1 text-sm text-slate-600">{{ nombreOrganizacion }}</p>
+  </div>
+  <a routerLink="/organizations" class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+    ← Volver a organizaciones
+  </a>
+</div>
 
-    <div class="text-sm text-slate-600">
-      Administrador autenticado:
-      <strong class="text-slate-900">{{ users[0].userName }}</strong>
+<!-- Mensajes -->
+<div *ngIf="successMessage" class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700"><strong>✓</strong> {{ successMessage }}</div>
+<div *ngIf="loadError" class="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700"><strong>!</strong> {{ loadError }}</div>
+<div *ngIf="isLoading && !usuarios.length" class="mb-4 text-center text-sm text-slate-500">Cargando...</div>
+
+<!-- Pestañas de Navegación -->
+<div class="mb-6 border-b border-slate-200">
+  <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+    <button (click)="selectTab('configuracion')" [ngClass]="{'border-indigo-500 text-indigo-600': activeTab === 'configuracion', 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700': activeTab !== 'configuracion'}" class="whitespace-nowrap border-b-2 px-1 py-3 text-sm font-medium">Configuración</button>
+    <button (click)="selectTab('miembros')" [ngClass]="{'border-indigo-500 text-indigo-600': activeTab === 'miembros', 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700': activeTab !== 'miembros'}" class="whitespace-nowrap border-b-2 px-1 py-3 text-sm font-medium">Miembros</button>
+    <button (click)="selectTab('actividades')" [ngClass]="{'border-indigo-500 text-indigo-600': activeTab === 'actividades', 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700': activeTab !== 'actividades'}" class="whitespace-nowrap border-b-2 px-1 py-3 text-sm font-medium">Actividades</button>
+  </nav>
+</div>
+
+<!-- Contenido de las Pestañas -->
+<div [ngSwitch]="activeTab">
+
+  <!-- ==================== PESTAÑA CONFIGURACIÓN ==================== -->
+  <div *ngSwitchCase="'configuracion'">
+    <form [formGroup]="organizacionForm" (ngSubmit)="guardarConfiguracion()">
+      <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div class="border-b border-slate-200 px-5 py-4"><h2 class="text-base font-semibold text-slate-900">Perfil de la Organización</h2></div>
+        <div class="p-5">
+          <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div class="form-group md:col-span-2" formGroupName="organizacion"><label class="mb-1 block text-sm font-medium text-slate-700">Nombre *</label><input type="text" formControlName="nombre" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"></div>
+            <div class="form-group md:col-span-2" formGroupName="organizacion"><label class="mb-1 block text-sm font-medium text-slate-700">Descripción</label><textarea formControlName="descripcion" rows="3" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"></textarea></div>
+            <div class="form-group md:col-span-2" formGroupName="organizacion"><label class="mb-1 block text-sm font-medium text-slate-700">Universidad Afiliada *</label><select formControlName="idUniversidad" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"><option [ngValue]="null" disabled>Selecciona...</option><option *ngFor="let uni of universidades" [ngValue]="uni.idUniversidad">{{ uni.nombre }}</option></select></div>
+          </div>
+          <div class="mt-5 border-t border-slate-200 pt-5" formGroupName="ubicacion">
+            <h3 class="mb-3 text-sm font-semibold text-slate-800">Ubicación</h3>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div class="form-group"><label class="mb-1 block text-xs font-medium text-slate-700">País *</label><select formControlName="idPais" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"><option [ngValue]="null" disabled>Selecciona...</option><option *ngFor="let p of paises" [ngValue]="p.idPais">{{ p.nombre }}</option></select></div>
+              <div class="form-group"><label class="mb-1 block text-xs font-medium text-slate-700">Provincia *</label><select formControlName="idProvincia" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:bg-slate-100"><option [ngValue]="null" disabled>{{ loadingProvincias ? 'Cargando...' : 'Selecciona...' }}</option><option *ngFor="let p of provincias" [ngValue]="p.id">{{ p.nombre }}</option></select></div>
+              <div class="form-group"><label class="mb-1 block text-xs font-medium text-slate-700">Cantón *</label><select formControlName="idCanton" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:bg-slate-100"><option [ngValue]="null" disabled>{{ loadingCantones ? 'Cargando...' : 'Selecciona...' }}</option><option *ngFor="let c of cantones" [ngValue]="c.id">{{ c.nombre }}</option></select></div>
+              <div class="form-group"><label class="mb-1 block text-xs font-medium text-slate-700">Distrito *</label><select formControlName="idDistrito" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:bg-slate-100"><option [ngValue]="null" disabled>{{ loadingDistritos ? 'Cargando...' : 'Selecciona...' }}</option><option *ngFor="let d of distritos" [ngValue]="d.id">{{ d.nombre }}</option></select></div>
+              <div class="form-group md:col-span-4"><label class="mb-1 block text-xs font-medium text-slate-700">Dirección</label><input type="text" formControlName="direccion" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"></div>
+            </div>
+          </div>
+        </div>
+        <div class="flex justify-end border-t border-slate-200 bg-slate-50 px-5 py-3"><button type="submit" [disabled]="isLoading || organizacionForm.pristine || !organizacionForm.valid" class="rounded-lg bg-blue-600 px-6 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50">{{ isLoading ? 'Guardando...' : 'Guardar Cambios' }}</button></div>
+      </div>
+    </form>
+  </div>
+
+  <!-- ==================== PESTAÑA MIEMBROS ==================== -->
+  <div *ngSwitchCase="'miembros'">
+    <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div class="border-b border-slate-200 px-5 py-4"><h2 class="text-base font-semibold text-slate-900">Miembros de la Organización</h2></div>
+      <div class="p-5">
+        <div class="mb-4"><input type="text" placeholder="Buscar por nombre o usuario..." (input)="onMiembrosSearch($event)" class="w-full max-w-sm rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none"></div>
+        <div class="grid grid-cols-1 gap-4 lg:grid-cols-12">
+          <div class="lg:col-span-7">
+            <div class="max-h-[60vh] overflow-auto rounded-lg border border-slate-200">
+              <table class="min-w-full text-left text-sm">
+                <thead class="sticky top-0 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                  <tr><th class="px-4 py-3">Usuario</th><th class="px-4 py-3">Rol</th><th class="px-4 py-3">Estado</th><th class="px-4 py-3 text-right">Acciones</th></tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                  <tr *ngFor="let usuario of filteredUsuarios" (click)="seleccionarUsuario(usuario)" class="cursor-pointer hover:bg-slate-50/60" [class.bg-blue-50]="usuarioSeleccionado?.idUsuario === usuario.idUsuario">
+                    <td class="px-4 py-3"><p class="font-medium text-slate-900">{{ usuario.nombre || usuario.username }}</p><p class="text-xs text-slate-500">{{ usuario.username }}</p></td>
+                  <td class="px-4 py-3">
+                    <!-- Si es Voluntario, mostrar texto (el botón de promover está en la columna de Acciones) -->
+                    <div *ngIf="usuario.idRol === 4; else rolDropdown">
+                      <span class="text-sm font-medium text-slate-700">{{ getNombreRol(usuario.idRol) }}</span>
+                    </div>
+                    <!-- Si es Admin, Coordinador o Asistente, mostrar dropdown -->
+                    <ng-template #rolDropdown>
+                      <select
+                        class="rounded border border-slate-300 bg-white px-2 py-1 text-xs disabled:opacity-50"
+                        [ngModel]="usuario.idRol"
+                        [disabled]="updatingUserId === usuario.idUsuario"
+                        (change)="cambiarRolUsuario(usuario, +$any($event.target).value)"
+                        (click)="$event.stopPropagation()"
+                      >
+                        <option *ngFor="let rol of rolesParaDropdown" [value]="rol.id">
+                          {{ rol.nombre }}
+                        </option>
+                      </select>
+                    </ng-template>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span
+                      class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
+                      [class.bg-emerald-100]="usuario.isActivo"
+                      [class.text-emerald-700]="usuario.isActivo"
+                      [class.bg-slate-100]="!usuario.isActivo"
+                      [class.text-slate-600]="!usuario.isActivo"
+                    >
+                      {{ usuario.isActivo ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 text-right">
+                    <!-- Botón de Promover para Voluntarios -->
+                    <button
+                      *ngIf="usuario.idRol === 4"
+                      type="button"
+                      class="rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-200"
+                      (click)="promoverVoluntario(usuario); $event.stopPropagation()"
+                    >
+                      Promover a Asistente
+                    </button>
+                    <!-- Botón de Eliminar para todos -->
+                    <button
+                      type="button"
+                      class="ml-2 rounded bg-red-100 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-200"
+                      (click)="confirmarEliminarUsuario(usuario); $event.stopPropagation()"
+                    >
+                      Eliminar
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="filteredUsuarios.length === 0">
+                  <td colspan="4" class="px-4 py-8 text-center text-slate-500">
+                    No se encontraron miembros.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+          <div class="lg:col-span-5">
+             <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <h3 class="mb-3 text-sm font-semibold text-slate-900">Detalle del usuario</h3>
+              <div *ngIf="usuarioSeleccionado; else noUserSelected" class="space-y-2 text-sm text-slate-700">
+                <p><strong>Nombre:</strong> {{ usuarioSeleccionado.nombre }} {{ usuarioSeleccionado.apellidoP }} {{ usuarioSeleccionado.apellidoM }}</p>
+                <p><strong>Usuario:</strong> {{ usuarioSeleccionado.username }}</p>
+                <p><strong>Rol:</strong> {{ getNombreRol(usuarioSeleccionado.idRol) }}</p>
+                <p><strong>Estado:</strong> {{ usuarioSeleccionado.isActivo ? 'Activo' : 'Inactivo' }}</p>
+              </div>
+              <ng-template #noUserSelected><p class="text-sm text-slate-500">Selecciona un usuario de la lista para ver sus detalles.</p></ng-template>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="mb-6">
-    <h2 class="text-base font-semibold text-slate-900">Administrar roles de usuario</h2>
-    <p class="mt-1 text-sm text-slate-600">
-      Asigna, modifica o revoca los roles de los usuarios registrados en el sistema de voluntariado.
-    </p>
+  <!-- ==================== PESTAÑA ACTIVIDADES ==================== -->
+  <div *ngSwitchCase="'actividades'">
+    <div *ngIf="!isActivityFormVisible" class="rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4"><h2 class="text-base font-semibold text-slate-900">Actividades Existentes</h2><button (click)="showCreateActivityForm()" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">+ Crear Actividad</button></div>
+      <div class="p-5">
+        <div class="overflow-auto rounded-lg border border-slate-200">
+          <table class="min-w-full text-left text-sm">
+            <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600">
+              <tr><th class="px-4 py-3">Nombre</th><th class="px-4 py-3">Fechas</th><th class="px-4 py-3">Horas</th><th class="px-4 py-3 text-right">Acciones</th></tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200">
+              <tr *ngFor="let actividad of actividades" class="hover:bg-slate-50/60">
+                <td class="px-4 py-3 font-medium text-slate-900">{{ actividad.nombre }}</td>
+                <td class="px-4 py-3 text-slate-600">{{ formatDate(actividad.fechaInicio) }} - {{ formatDate(actividad.fechaFin) }}</td>
+                <td class="px-4 py-3 text-slate-600">{{ actividad.horas }}</td>
+                <td class="space-x-2 px-4 py-3 text-right">
+                  <button type="button" (click)="showEditActivityForm(actividad)" class="rounded bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-200">Editar</button>
+                  <button type="button" (click)="confirmarEliminarActividad(actividad)" class="rounded bg-red-100 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-200">Eliminar</button>
+                </td>
+              </tr>
+              <tr *ngIf="actividades.length === 0"><td colspan="5" class="px-4 py-8 text-center text-slate-500">No hay actividades creadas.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulario de Actividad (Crear/Editar) -->
+    <div *ngIf="isActivityFormVisible">
+      <app-activity-form
+        [idOrganizacion]="idOrganizacion"
+        [activity]="selectedActivity"
+        [categorias]="categorias"
+        (formSubmitted)="onActivityFormSubmitted()"
+        (formCanceled)="onActivityFormCanceled()"
+      ></app-activity-form>
+    </div>
   </div>
+</div>
 
-  <!-- Grid: izquierda (tabla) / derecha (detalle) -->
-  <div class="grid grid-cols-1 gap-4 lg:grid-cols-12">
-    <!-- Columna izquierda -->
-    <section class="rounded-xl border border-slate-200 bg-white shadow-sm lg:col-span-7">
-      <div class="border-b border-slate-200 px-5 py-4">
-        <div class="flex items-center justify-between gap-3">
-          <h3 class="text-sm font-semibold text-slate-900">Listado de usuarios</h3>
-          <span class="text-xs text-slate-500">Total: 3</span>
-        </div>
-      </div>
-
-      <div class="px-5 py-4">
-        <!-- Filtros -->
-        <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
-          <div>
-            <label class="mb-1 block text-xs font-semibold text-slate-700" for="f-nombre">Nombre</label>
-            <input
-              id="f-nombre"
-              type="text"
-              placeholder="Buscar por nombre..."
-              class="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none transition
-                     focus:border-blue-600 focus:bg-white focus:ring-1 focus:ring-blue-600/20"
-            />
-          </div>
-
-          <div>
-            <label class="mb-1 block text-xs font-semibold text-slate-700" for="f-correo">Correo</label>
-            <input
-              id="f-correo"
-              type="text"
-              placeholder="Buscar por correo..."
-              class="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none transition
-                     focus:border-blue-600 focus:bg-white focus:ring-1 focus:ring-blue-600/20"
-            />
-          </div>
-
-          <div>
-            <label class="mb-1 block text-xs font-semibold text-slate-700" for="f-rol">Rol</label>
-            <select
-              id="f-rol"
-              class="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none transition
-                     focus:border-blue-600 focus:bg-white focus:ring-1 focus:ring-blue-600/20"
-            >
-              <option value="">Todos</option>
-              <option>Voluntario</option>
-              <option>Coordinador</option>
-              <option>Administrador</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="mt-4 flex justify-end gap-2">
-          <button
-            type="button"
-            class="rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100"
-          >
-            Limpiar filtros
-          </button>
-          <button
-            type="button"
-            class="rounded-full bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700
-                   focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
-          >
-            Aplicar filtros
-          </button>
-        </div>
-      </div>
-
-      <!-- Tabla -->
-      <div class="max-h-[60vh] overflow-x-auto overflow-y-auto">
-        <table class="min-w-full text-left text-sm">
-          <thead class="sticky top-0 z-10 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600">
-            <tr>
-              <th class="whitespace-nowrap px-4 py-3">Nombre</th>
-              <th class="whitespace-nowrap px-4 py-3">Correo</th>
-              <th class="whitespace-nowrap px-4 py-3">Roles</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-200">
-            <tr class="hover:bg-slate-50/60">
-              <td class="px-4 py-3 font-medium text-slate-900">Ana Pérez</td>
-              <td class="px-4 py-3 text-slate-700">ana.perez@uni.ac.cr</td>
-              <td class="px-4 py-3">
-                <span class="mr-1 inline-flex items-center rounded-full bg-sky-50 px-2.5 py-1 text-[11px] font-semibold text-sky-700">
-                  Voluntario
-                </span>
-              </td>
-            </tr>
-
-            <tr class="hover:bg-slate-50/60">
-              <td class="px-4 py-3 font-medium text-slate-900">Carlos López</td>
-              <td class="px-4 py-3 text-slate-700">carlos.lopez@uni.ac.cr</td>
-              <td class="px-4 py-3">
-                <span class="mr-1 inline-flex items-center rounded-full bg-sky-50 px-2.5 py-1 text-[11px] font-semibold text-sky-700">
-                  Voluntario
-                </span>
-                <span class="mr-1 inline-flex items-center rounded-full bg-sky-50 px-2.5 py-1 text-[11px] font-semibold text-sky-700">
-                  Coordinador
-                </span>
-              </td>
-            </tr>
-
-            <tr class="hover:bg-slate-50/60">
-              <td class="px-4 py-3 font-medium text-slate-900">Admin General</td>
-              <td class="px-4 py-3 text-slate-700">admin@uni.ac.cr</td>
-              <td class="px-4 py-3">
-                <span class="mr-1 inline-flex items-center rounded-full bg-sky-50 px-2.5 py-1 text-[11px] font-semibold text-sky-700">
-                  Administrador
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- Columna derecha -->
-    <section class="rounded-xl border border-slate-200 bg-white shadow-sm lg:col-span-5">
-      <div class="border-b border-slate-200 px-5 py-4">
-        <h3 class="text-sm font-semibold text-slate-900">Detalle del usuario seleccionado</h3>
-      </div>
-
-      <div class="px-5 py-4">
-        <div class="space-y-2 text-sm text-slate-700">
-          <p><strong>Usuario:</strong> Carlos López</p>
-          <p><strong>Correo:</strong> carlos.lopez@uni.ac.cr</p>
-
-          <p class="mt-3 font-semibold text-slate-800">Roles actuales:</p>
-          <div class="flex flex-wrap gap-2">
-            <span class="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-1 text-[11px] font-semibold text-indigo-700">
-              Voluntario
-            </span>
-            <span class="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-1 text-[11px] font-semibold text-indigo-700">
-              Coordinador
-            </span>
-          </div>
-        </div>
-
-        <div class="mt-6">
-          <label class="mb-2 block text-sm font-semibold text-slate-800">Modificar roles asignados</label>
-
-          <div class="flex flex-col gap-2 text-sm text-slate-700">
-            <label class="inline-flex items-center gap-2">
-              <input type="checkbox" checked class="h-4 w-4 rounded border-slate-300" />
-              Voluntario
-            </label>
-            <label class="inline-flex items-center gap-2">
-              <input type="checkbox" checked class="h-4 w-4 rounded border-slate-300" />
-              Coordinador
-            </label>
-            <label class="inline-flex items-center gap-2">
-              <input type="checkbox" class="h-4 w-4 rounded border-slate-300" />
-              Administrador
-            </label>
-          </div>
-        </div>
-
-        <div class="mt-6 flex justify-end gap-2">
-          <button
-            type="button"
-            class="rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            class="rounded-full bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700
-                   focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
-          >
-            Guardar cambios
-          </button>
-        </div>
-
-        <div class="mt-6 rounded-lg border border-dashed border-slate-200 bg-slate-50 p-4 text-xs text-slate-600">
-          <strong>Última acción registrada:</strong><br />
-          12/11/2025 09:45 · admin@universidad.ac.cr cambió roles de carlos.lopez@uni.ac.cr:<br />
-          agregó rol <strong>Coordinador</strong>, mantuvo <strong>Voluntario</strong>.
-        </div>
-
-        <div class="mt-4 flex gap-3 rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
-          <div class="flex h-6 w-6 items-center justify-center rounded-full bg-rose-600 text-white text-xs font-bold">
-            !
-          </div>
-          <div>
-            <strong>No se puede eliminar el último administrador.</strong><br />
-            Esta acción está bloqueada porque el sistema requiere al menos un usuario con rol
-            <strong>Administrador</strong>. Asigna primero este rol a otro usuario antes de retirarlo aquí.
-          </div>
-        </div>
-
-        <div class="mt-4 flex gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-700">
-          <div class="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-white text-xs font-bold">
-            i
-          </div>
-          <div>
-            Los cambios de roles se aplicarán en los próximos inicios de sesión de los usuarios.
-            Sus paneles se actualizarán automáticamente según los roles vigentes.
-          </div>
-        </div>
-      </div>
-    </section>
+<!-- ==================== MODAL DE CONFIRMACIÓN ==================== -->
+<div *ngIf="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" (click)="closeModal()">
+  <div class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl" (click)="$event.stopPropagation()">
+    <h3 class="mb-2 text-lg font-semibold text-slate-900">{{ modalTitle }}</h3>
+    <p class="mb-6 text-sm text-slate-600">{{ modalMessage }}</p>
+    <div class="flex justify-end gap-3">
+      <button type="button" (click)="closeModal()" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Cancelar</button>
+      <button type="button" (click)="confirmModalAction()" class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700">Confirmar</button>
+    </div>
   </div>
 </div>

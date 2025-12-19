@@ -1,0 +1,227 @@
+<form [formGroup]="activityForm" (ngSubmit)="saveActivity()" class="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+  <h3 class="text-sm font-semibold text-slate-900">
+    {{ activity ? 'Editar Actividad' : 'Crear Nueva Actividad' }}
+  </h3>
+
+  <div *ngIf="errorMessage" class="rounded-md bg-red-50 p-3">
+    <p class="text-sm text-red-700">{{ errorMessage }}</p>
+  </div>
+
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <!-- Nombre -->
+    <div class="form-group md:col-span-2">
+      <label class="mb-1 block text-xs font-medium text-slate-700">Nombre *</label>
+      <input
+        type="text"
+        formControlName="nombre"
+        placeholder="Nombre de la actividad"
+        class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+        [class.border-red-500]="activityForm.get('nombre')?.touched && activityForm.get('nombre')?.invalid"
+      />
+      <p *ngIf="activityForm.get('nombre')?.touched && activityForm.get('nombre')?.invalid" class="mt-1 text-xs text-red-500">
+        El nombre es requerido (máx 255 caracteres).
+      </p>
+    </div>
+
+    <!-- Categoría -->
+    <div class="form-group">
+      <label class="mb-1 block text-xs font-medium text-slate-700">Categoría *</label>
+      <select
+        formControlName="idCategoria"
+        class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+        [class.border-red-500]="activityForm.get('idCategoria')?.touched && activityForm.get('idCategoria')?.invalid"
+      >
+        <option [ngValue]="null" disabled>Selecciona...</option>
+        <option *ngFor="let cat of categorias" [ngValue]="cat.idCategoria">
+          {{ cat.nombre }}
+        </option>
+      </select>
+      <p *ngIf="activityForm.get('idCategoria')?.touched && activityForm.get('idCategoria')?.invalid" class="mt-1 text-xs text-red-500">
+        Debes seleccionar una categoría.
+      </p>
+    </div>
+
+    <!-- Descripción -->
+    <div class="form-group md:col-span-2">
+      <label class="mb-1 block text-xs font-medium text-slate-700">Descripción</label>
+      <textarea
+        formControlName="descripcion"
+        rows="3"
+        placeholder="Descripción breve de la actividad"
+        class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+        [class.border-red-500]="activityForm.get('descripcion')?.touched && activityForm.get('descripcion')?.invalid"
+      ></textarea>
+      <p *ngIf="activityForm.get('descripcion')?.touched && activityForm.get('descripcion')?.invalid" class="mt-1 text-xs text-red-500">
+        Máximo 1000 caracteres.
+      </p>
+    </div>
+
+    <!-- Fecha inicio -->
+    <div class="form-group">
+      <label class="mb-1 block text-xs font-medium text-slate-700">Fecha/Hora Inicio *</label>
+      <input
+        type="datetime-local"
+        formControlName="fechaInicio"
+        class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+        [class.border-red-500]="activityForm.get('fechaInicio')?.touched && activityForm.get('fechaInicio')?.invalid"
+      />
+      <p *ngIf="activityForm.get('fechaInicio')?.touched && activityForm.get('fechaInicio')?.invalid" class="mt-1 text-xs text-red-500">
+        La fecha de inicio es requerida.
+      </p>
+    </div>
+
+    <!-- Fecha fin -->
+    <div class="form-group">
+      <label class="mb-1 block text-xs font-medium text-slate-700">Fecha/Hora Fin *</label>
+      <input
+        type="datetime-local"
+        formControlName="fechaFin"
+        class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+        [class.border-red-500]="activityForm.get('fechaFin')?.touched && activityForm.get('fechaFin')?.invalid"
+      />
+      <p *ngIf="activityForm.get('fechaFin')?.touched && activityForm.get('fechaFin')?.invalid" class="mt-1 text-xs text-red-500">
+        La fecha de fin es requerida.
+      </p>
+    </div>
+
+    <!-- Horas -->
+    <div class="form-group">
+      <label class="mb-1 block text-xs font-medium text-slate-700">Horas Acreditadas *</label>
+      <input
+        type="number"
+        formControlName="horas"
+        min="1"
+        class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+        [class.border-red-500]="activityForm.get('horas')?.touched && activityForm.get('horas')?.invalid"
+      />
+      <p *ngIf="activityForm.get('horas')?.touched && activityForm.get('horas')?.invalid" class="mt-1 text-xs text-red-500">
+        Mínimo 1 hora.
+      </p>
+    </div>
+
+    <!-- Cupos -->
+    <div class="form-group">
+      <label class="mb-1 block text-xs font-medium text-slate-700">Cupos *</label>
+      <input
+        type="number"
+        formControlName="cupos"
+        min="1"
+        class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+        [class.border-red-500]="activityForm.get('cupos')?.touched && activityForm.get('cupos')?.invalid"
+      />
+      <p *ngIf="activityForm.get('cupos')?.touched && activityForm.get('cupos')?.invalid" class="mt-1 text-xs text-red-500">
+        Mínimo 1 cupo.
+      </p>
+    </div>
+
+    <!-- Ubicación -->
+    <div class="md:col-span-2 mt-2 border-t border-slate-200 pt-4">
+      <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Ubicación de la Actividad</h4>
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <!-- País -->
+        <div class="form-group">
+          <label class="mb-1 block text-xs font-medium text-slate-700">País *</label>
+          <select
+            formControlName="idPais"
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            [class.border-red-500]="activityForm.get('idPais')?.touched && activityForm.get('idPais')?.invalid"
+          >
+            <option [ngValue]="null" disabled>Selecciona...</option>
+            <option *ngFor="let p of paises" [ngValue]="p.idPais">{{ p.nombre }}</option>
+          </select>
+          <p *ngIf="activityForm.get('idPais')?.touched && activityForm.get('idPais')?.invalid" class="mt-1 text-xs text-red-500">
+            El país es requerido.
+          </p>
+        </div>
+
+        <!-- Provincia -->
+        <div class="form-group">
+          <label class="mb-1 block text-xs font-medium text-slate-700">Provincia *</label>
+          <select
+            formControlName="idProvincia"
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:bg-slate-100"
+            [class.border-red-500]="activityForm.get('idProvincia')?.touched && activityForm.get('idProvincia')?.invalid"
+          >
+            <option [ngValue]="null" disabled>{{ loadingProvincias ? 'Cargando...' : 'Selecciona...' }}</option>
+            <option *ngFor="let p of provincias" [ngValue]="p.id">{{ p.nombre }}</option>
+          </select>
+          <p *ngIf="activityForm.get('idProvincia')?.touched && activityForm.get('idProvincia')?.invalid" class="mt-1 text-xs text-red-500">
+            La provincia es requerida.
+          </p>
+        </div>
+
+        <!-- Cantón -->
+        <div class="form-group">
+          <label class="mb-1 block text-xs font-medium text-slate-700">Cantón *</label>
+          <select
+            formControlName="idCanton"
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:bg-slate-100"
+            [class.border-red-500]="activityForm.get('idCanton')?.touched && activityForm.get('idCanton')?.invalid"
+          >
+            <option [ngValue]="null" disabled>{{ loadingCantones ? 'Cargando...' : 'Selecciona...' }}</option>
+            <option *ngFor="let c of cantones" [ngValue]="c.id">{{ c.nombre }}</option>
+          </select>
+          <p *ngIf="activityForm.get('idCanton')?.touched && activityForm.get('idCanton')?.invalid" class="mt-1 text-xs text-red-500">
+            El cantón es requerido.
+          </p>
+        </div>
+
+        <!-- Distrito -->
+        <div class="form-group">
+          <label class="mb-1 block text-xs font-medium text-slate-700">Distrito *</label>
+          <select
+            formControlName="idDistrito"
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:bg-slate-100"
+            [class.border-red-500]="activityForm.get('idDistrito')?.touched && activityForm.get('idDistrito')?.invalid"
+          >
+            <option [ngValue]="null" disabled>{{ loadingDistritos ? 'Cargando...' : 'Selecciona...' }}</option>
+            <option *ngFor="let d of distritos" [ngValue]="d.id">{{ d.nombre }}</option>
+          </select>
+          <p *ngIf="activityForm.get('idDistrito')?.touched && activityForm.get('idDistrito')?.invalid" class="mt-1 text-xs text-red-500">
+            El distrito es requerido.
+          </p>
+        </div>
+
+        <!-- Dirección -->
+        <div class="form-group md:col-span-2">
+          <label class="mb-1 block text-xs font-medium text-slate-700">Dirección</label>
+          <input
+            type="text"
+            formControlName="direccion"
+            placeholder="Dirección exacta o punto de encuentro"
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+          />
+        </div>
+
+        <!-- Código Postal -->
+        <div class="form-group">
+          <label class="mb-1 block text-xs font-medium text-slate-700">Código Postal</label>
+          <input
+            type="text"
+            formControlName="codigoPostal"
+            placeholder="Ej: 10101"
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botones de Acción -->
+  <div class="mt-4 flex justify-end gap-3 border-t border-slate-200 pt-4">
+    <button
+      type="button"
+      (click)="cancel()"
+      class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+    >
+      Cancelar
+    </button>
+    <button
+      type="submit"
+      [disabled]="isLoading"
+      class="rounded-lg bg-blue-600 px-6 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+    >
+      {{ isLoading ? 'Guardando...' : (activity ? 'Actualizar' : 'Crear') }}
+    </button>
+  </div>
+</form>

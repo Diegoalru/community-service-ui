@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { AdminSessionService } from '../../../core/services/admin-session.service';
 
 @Component({
   selector: 'app-navbar',
@@ -42,8 +43,30 @@ import { AuthService } from '../../../core/services/auth.service';
               </summary>
 
               <div
-                class="absolute right-0 mt-2 w-56 rounded-xl border border-slate-200 bg-white p-1 shadow-lg"
+                class="absolute right-0 mt-2 w-64 rounded-xl border border-slate-200 bg-white p-1 shadow-lg z-50"
               >
+                <!-- Indicador de organización activa -->
+                <div *ngIf="adminSession.organizacionActual$ | async as orgActual"
+                     class="mx-2 mb-2 rounded-lg border border-indigo-200 bg-indigo-50 p-3">
+                  <p class="text-xs font-medium text-indigo-600">Organización activa:</p>
+                  <p class="text-sm font-semibold text-indigo-900 truncate">{{ orgActual.nombre }}</p>
+                  <div class="mt-2 flex gap-2">
+                    <a
+                      [routerLink]="['/admin/organization', orgActual.idOrganizacion]"
+                      class="flex-1 rounded-md bg-indigo-600 px-2 py-1 text-center text-xs font-semibold text-white hover:bg-indigo-700"
+                    >
+                      Panel Admin
+                    </a>
+                    <button
+                      type="button"
+                      (click)="salirDeOrganizacion()"
+                      class="rounded-md border border-indigo-300 bg-white px-2 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100"
+                    >
+                      Salir
+                    </button>
+                  </div>
+                </div>
+
                 <a
                   routerLink="/events/inscriptions"
                   routerLinkActive="bg-slate-100"
@@ -72,13 +95,16 @@ import { AuthService } from '../../../core/services/auth.service';
                 >
                   Ver mis horas
                 </a>
-                  <a
-                  routerLink="/administration"
-                  routerLinkActive="bg-slate-100"
-                  class="block rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+
+                <!-- Separador y logout -->
+                <div class="my-1 border-t border-slate-200"></div>
+                <button
+                  type="button"
+                  (click)="logout()"
+                  class="block w-full rounded-lg px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
                 >
-                  Modulo Administrador
-                </a>
+                  Cerrar sesión
+                </button>
               </div>
             </details>
           </ng-container>
@@ -106,7 +132,22 @@ import { AuthService } from '../../../core/services/auth.service';
   `,
 })
 export class NavbarComponent {
-  constructor(public auth: AuthService) {}
+  constructor(
+    public auth: AuthService,
+    public adminSession: AdminSessionService,
+    private router: Router
+  ) {}
+
+  salirDeOrganizacion(): void {
+    this.adminSession.clearOrganizacionActual();
+    this.router.navigate(['/organizations']);
+  }
+
+  logout(): void {
+    this.adminSession.clearSession();
+    this.auth.logout();
+    this.router.navigate(['/login']);
+  }
 }
 
 

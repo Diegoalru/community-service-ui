@@ -7,6 +7,7 @@ import { LandingComponent } from './pages/landing/landing.component';
 import { ActivateComponent } from './pages/activate/activate.component';
 import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
 import { authGuard } from './core/guards/auth.guard';
+import { adminGuard } from './core/guards/admin.guard';
 import { OrganizationsComponent } from './pages/organizations/organizations.component';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { MyHoursComponent } from './pages/my-hours/my-hours.component';
@@ -23,7 +24,9 @@ export const routes: Routes = [
   { path: 'organizations', component: OrganizationsComponent, canActivate: [authGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
   { path: 'my-hours', component: MyHoursComponent, canActivate: [authGuard] },
-  { path: 'administration', component: AdministrationComponent, canActivate: [authGuard] },
-  // ... existing routes above ...
+  { path: 'admin/organization/:idOrg', component: AdministrationComponent, canActivate: [authGuard, adminGuard] },
+  // Redirigir ruta antigua a organizaciones
+  { path: 'administration', redirectTo: 'organizations', pathMatch: 'full' },
+  // ...existing routes above...
   { path: '**', redirectTo: '' }, // or redirectTo: '/',
 ];
