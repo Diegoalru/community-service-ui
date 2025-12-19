@@ -39,6 +39,8 @@ export type HorarioActividadBasicoDto = {
   descripcion: string | null;
   situacion: string; // char en backend
   estado: string; // char en backend
+  // Nuevo: el backend ahora indica si el usuario consultado está inscrito en ESTE horario
+  usuarioInscrito?: boolean;
 };
 
 /**
@@ -59,9 +61,6 @@ export type ActividadDetalleDto = {
   cupos: number;
   situacion: string; // char en backend
   estado: string; // char en backend
-
-  // Nuevo atributo desde el endpoint: si el usuario (consultado) ya está inscrito.
-  usuarioInscrito?: boolean;
 
   organizacion: OrganizacionBasicaDto;
   usuarioCreador: UsuarioBasicoDto;
@@ -106,8 +105,8 @@ export type EventRow = {
   id: string;
   idActividad: number;
   idOrganizacion: number;
-  idHorarioActividad: number | null;
   usuarioInscrito: boolean;
+  horarios: HorarioActividadBasicoDto[];
   nombreEvento: string;
   cupo: number;
   hora: string;

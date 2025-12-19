@@ -1,0 +1,81 @@
+<div class="mx-auto max-w-6xl px-6 py-8">
+  <div class="mb-6">
+    <h1 class="text-2xl font-semibold text-slate-900">Mis horas</h1>
+    <p class="mt-1 text-sm text-slate-600">
+      Visualiza el desglose de tus horas de servicio comunitario por actividad.
+    </p>
+  </div>
+
+  <div *ngIf="isLoading" class="rounded-xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+    <p class="text-sm text-slate-600">Cargando tus horas...</p>
+  </div>
+
+  <div *ngIf="!isLoading && loadError" class="rounded-xl border border-rose-200 bg-rose-50 p-6 shadow-sm">
+    <p class="text-sm font-semibold text-rose-700">Error</p>
+    <p class="mt-1 text-sm text-rose-700">{{ loadError }}</p>
+  </div>
+
+  <ng-container *ngIf="!isLoading && !loadError">
+  <div class="grid gap-4 sm:grid-cols-3">
+    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Horas totales</p>
+      <p class="mt-2 text-3xl font-semibold text-slate-900">{{ totalHoras | number:'1.0-2' }}</p>
+      <p class="mt-1 text-xs text-slate-500">Acumuladas</p>
+    </div>
+    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Actividades</p>
+      <p class="mt-2 text-3xl font-semibold text-slate-900">{{ actividades }}</p>
+      <p class="mt-1 text-xs text-slate-500">Participaciones registradas</p>
+    </div>
+    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Última participación</p>
+      <p class="mt-2 text-lg font-semibold text-slate-900">
+        {{ ultimaParticipacion ? (ultimaParticipacion | date: 'mediumDate') : '—' }}
+      </p>
+      <p class="mt-1 text-xs text-slate-500">Fecha más reciente</p>
+    </div>
+  </div>
+
+  <div class="mt-6 rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div class="border-b border-slate-200 px-5 py-4">
+      <div class="flex items-center justify-between gap-3">
+        <h2 class="text-sm font-semibold text-slate-900">Desglose</h2>
+        <span class="text-xs text-slate-500">Total filas: {{ items.length }}</span>
+      </div>
+    </div>
+
+    <div *ngIf="items.length === 0" class="px-5 py-10 text-center">
+      <p class="text-sm text-slate-600">Aún no tienes horas registradas.</p>
+    </div>
+
+    <div *ngIf="items.length > 0" class="overflow-x-auto">
+      <table class="min-w-full text-left text-sm">
+        <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600">
+          <tr>
+            <th class="whitespace-nowrap px-4 py-3">Actividad</th>
+            <th class="whitespace-nowrap px-4 py-3">Fecha</th>
+            <th class="whitespace-nowrap px-4 py-3 text-right">Horas</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-200">
+          <tr *ngFor="let it of items" class="hover:bg-slate-50/60">
+            <td class="px-4 py-3 font-medium text-slate-900">{{ it.actividad }}</td>
+            <td class="px-4 py-3 text-slate-700">{{ it.fecha | date: 'mediumDate' }}</td>
+            <td class="px-4 py-3 text-right font-semibold text-slate-900">{{ it.horas | number:'1.0-2' }}</td>
+          </tr>
+        </tbody>
+        <tfoot class="bg-slate-50">
+          <tr>
+            <td class="px-4 py-3 text-sm font-semibold text-slate-700" colspan="2">Horas totales</td>
+            <td class="px-4 py-3 text-right text-sm font-semibold text-slate-900">
+              {{ totalHoras | number:'1.0-2' }}
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+  </ng-container>
+</div>
+
+

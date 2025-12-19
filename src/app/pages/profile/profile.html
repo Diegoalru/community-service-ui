@@ -1,0 +1,141 @@
+<div class="mx-auto max-w-6xl px-6 py-8">
+  <div class="mb-6 flex items-start justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-semibold text-slate-900">Perfil</h1>
+      <p class="mt-1 text-sm text-slate-600">
+        Visualiza la información registrada para tu usuario.
+      </p>
+    </div>
+
+    <span
+      *ngIf="perfil"
+      class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold"
+      [ngClass]="estadoBadgeClass"
+    >
+      <span class="h-2 w-2 rounded-full" [ngClass]="perfil.estado?.toUpperCase() === 'A' ? 'bg-emerald-500' : 'bg-slate-400'"></span>
+      {{ estadoLabel }}
+    </span>
+  </div>
+
+  <div *ngIf="isLoading" class="rounded-xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+    <p class="text-sm text-slate-600">Cargando tu perfil...</p>
+  </div>
+
+  <div *ngIf="!isLoading && loadError" class="rounded-xl border border-rose-200 bg-rose-50 p-6 shadow-sm">
+    <p class="text-sm font-semibold text-rose-700">Error</p>
+    <p class="mt-1 text-sm text-rose-700">{{ loadError }}</p>
+  </div>
+
+  <ng-container *ngIf="!isLoading && !loadError">
+    <div *ngIf="!perfil" class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <p class="text-sm text-slate-600">No hay información de perfil para mostrar.</p>
+    </div>
+
+    <div *ngIf="perfil" class="grid gap-4 lg:grid-cols-3">
+      <!-- Información personal -->
+      <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2">
+        <h2 class="text-sm font-semibold text-slate-900">Información personal</h2>
+
+        <dl class="mt-4 grid gap-4 sm:grid-cols-2">
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Identificación</dt>
+            <dd class="mt-1 text-sm font-medium text-slate-900">{{ perfil.identificacion || '—' }}</dd>
+          </div>
+
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Fecha de nacimiento</dt>
+            <dd class="mt-1 text-sm font-medium text-slate-900">
+              {{ perfil.fechaNacimiento ? (perfil.fechaNacimiento | date: 'mediumDate') : '—' }}
+            </dd>
+          </div>
+
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Nombre</dt>
+            <dd class="mt-1 text-sm font-medium text-slate-900">{{ perfil.nombre || '—' }}</dd>
+          </div>
+
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Apellidos</dt>
+            <dd class="mt-1 text-sm font-medium text-slate-900">
+              {{ (perfil.apellidoP || '') + (perfil.apellidoM ? (' ' + perfil.apellidoM) : '') || '—' }}
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- Académico -->
+      <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h2 class="text-sm font-semibold text-slate-900">Académico</h2>
+
+        <dl class="mt-4 grid gap-4">
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Carrera</dt>
+            <dd class="mt-1 text-sm font-medium text-slate-900">{{ perfil.carrera || '—' }}</dd>
+          </div>
+
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Universidad</dt>
+            <dd class="mt-1 text-sm font-medium text-slate-900">
+              <ng-container *ngIf="perfil.universidadNombre; else uniIdOnly">
+                {{ perfil.universidadNombre }}<span *ngIf="perfil.universidadSiglas"> ({{ perfil.universidadSiglas }})</span>
+              </ng-container>
+              <ng-template #uniIdOnly>
+                {{ perfil.idUniversidad ? ('#' + perfil.idUniversidad) : '—' }}
+              </ng-template>
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- Bibliografía -->
+      <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-3">
+        <div class="flex items-center justify-between gap-3">
+          <h2 class="text-sm font-semibold text-slate-900">Bibliografía</h2>
+          <span class="text-xs text-slate-500">Descripción / bio</span>
+        </div>
+
+        <p class="mt-3 whitespace-pre-wrap text-sm text-slate-700">
+          {{ perfil.bibliografia || '—' }}
+        </p>
+      </div>
+
+      <!-- Sistema -->
+      <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-3">
+        <h2 class="text-sm font-semibold text-slate-900">Datos del sistema</h2>
+
+        <dl class="mt-4 grid gap-4 sm:grid-cols-3">
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">IdPerfil</dt>
+            <dd class="mt-1 text-sm font-medium text-slate-900">{{ perfil.idPerfil ?? '—' }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">IdUsuario</dt>
+            <dd class="mt-1 text-sm font-medium text-slate-900">{{ perfil.idUsuario ?? '—' }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">IdUbicación</dt>
+            <dd class="mt-1 text-sm font-medium text-slate-900">{{ perfil.idUbicacion ?? '—' }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">IdIdentificador</dt>
+            <dd class="mt-1 text-sm font-medium text-slate-900">{{ perfil.idIdentificador ?? '—' }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">FechaDesde</dt>
+            <dd class="mt-1 text-sm font-medium text-slate-900">
+              {{ perfil.fechaDesde ? (perfil.fechaDesde | date: 'mediumDate') : '—' }}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">FechaHasta</dt>
+            <dd class="mt-1 text-sm font-medium text-slate-900">
+              {{ perfil.fechaHasta ? (perfil.fechaHasta | date: 'mediumDate') : '—' }}
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </ng-container>
+</div>
+
+

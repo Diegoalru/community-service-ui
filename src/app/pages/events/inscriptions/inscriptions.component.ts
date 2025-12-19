@@ -23,13 +23,17 @@ export class InscriptionsComponent implements OnInit {
   isLoading = false;
   loadError: string | null = null;
 
-  registeredEventIds = new Set<string>();
-  registeringEventIds = new Set<string>();
-  unregisteringEventIds = new Set<string>();
+  registeredHorarioKeys = new Set<string>();
+  registeringHorarioKeys = new Set<string>();
+  unregisteringHorarioKeys = new Set<string>();
+  cuposRestantesByHorarioKey = new Map<string, number>();
 
   isModalOpen = false;
   modalTitle = 'Confirmación';
   modalMessage = 'Inscripción exitosa.';
+
+  isHorariosModalOpen = false;
+  selectedEvent: EventRow | null = null;
 
   constructor(
     private eventsService: EventsService,
@@ -52,14 +56,8 @@ export class InscriptionsComponent implements OnInit {
     this.eventsService
       .getEvents(this.authService.getUserId() ?? 0)
       .pipe(
-        // Un row por cada horario disponible (actividad + horario)
-        map((items) =>
-          items.flatMap((dto) => {
-            const horarios = dto.horarios ?? [];
-            if (horarios.length === 0) return [];
-            return horarios.map((h) => this.toRow(dto, h));
-          })
-        ),
+        // Un row por actividad (si no tiene horarios, no se muestra)
+        map((items) => items.filter((dto) => (dto.horarios?.length ?? 0) > 0).map((dto) => this.toRow(dto))),
         catchError(() => {
           // Sin validación ni auth; si el API no está arriba todavía, dejamos 0 datos.
           this.loadError = null;
@@ -73,8 +71,15 @@ export class InscriptionsComponent implements OnInit {
       )
       .subscribe((rows) => {
         this.events = rows;
-        // Hidratamos "ya inscrito" desde el backend (usuarioInscrito).
-        this.registeredEventIds = new Set(rows.filter((r) => r.usuarioInscrito).map((r) => r.id));
+
+        // Hidratamos "ya inscrito" desde el backend (usuarioInscrito) POR HORARIO.
+        this.registeredHorarioKeys = new Set(
+          rows.flatMap((r) =>
+            r.horarios
+              .filter((h) => !!h.usuarioInscrito)
+              .map((h) => this.horarioKey(r.idActividad, h.idHorarioActividad))
+          ),
+        );
         // Extra safety: si el backend deja la conexión abierta por alguna razón,
         // al menos no nos quedamos "cargando" luego de recibir data.
         this.isLoading = false;
@@ -82,23 +87,25 @@ export class InscriptionsComponent implements OnInit {
       });
   }
 
-  private toRow(dto: EventDto, horario: HorarioActividadBasicoDto | null): EventRow {
-    const rowId = horario ? `${dto.idActividad}-${horario.idHorarioActividad}` : `${dto.idActividad}-nohorario`;
+  private toRow(dto: EventDto): EventRow {
+    const horarios = dto.horarios ?? [];
+    const normalized = horarios.map((h) => ({ ...h, usuarioInscrito: !!h.usuarioInscrito }));
+    const sorted = [...normalized].sort((a, b) => {
+      const da = new Date(a.horaInicio ?? a.fecha ?? '').getTime();
+      const db = new Date(b.horaInicio ?? b.fecha ?? '').getTime();
+      return (Number.isNaN(da) ? 0 : da) - (Number.isNaN(db) ? 0 : db);
+    });
+    const first = sorted[0] ?? null;
 
-    const hora = horario
-      ? this.formatHorario(horario.fecha, horario.horaInicio, horario.horaFin)
-      : this.formatHora(dto.fechaInicio);
-
-    const duracion = horario
-      ? this.formatDuracion(null, horario.horaInicio, horario.horaFin)
-      : this.formatDuracion(dto.horas, dto.fechaInicio, dto.fechaFin);
+    const hora = first ? this.formatHorario(first.fecha, first.horaInicio, first.horaFin) : '—';
+    const duracion = first ? this.formatDuracion(null, first.horaInicio, first.horaFin) : '—';
 
     return {
-      id: rowId,
+      id: String(dto.idActividad),
       idActividad: dto.idActividad,
       idOrganizacion: dto.idOrganizacion,
-      idHorarioActividad: horario?.idHorarioActividad ?? null,
-      usuarioInscrito: !!dto.usuarioInscrito,
+      usuarioInscrito: sorted.some((h) => !!h.usuarioInscrito),
+      horarios: sorted,
       nombreEvento: dto.nombre || '—',
       cupo: dto.cupos ?? 0,
       hora,
@@ -154,16 +161,71 @@ export class InscriptionsComponent implements OnInit {
     return `${hours} horas`;
   }
 
-  isRegistered(eventId: string): boolean {
-    return this.registeredEventIds.has(eventId);
+  private horarioKey(idActividad: number, idHorarioActividad: number): string {
+    return `${idActividad}-${idHorarioActividad}`;
   }
 
-  isRegistering(eventId: string): boolean {
-    return this.registeringEventIds.has(eventId);
+  private applyCuposToActividad(idActividad: number, cuposRestantes: number): void {
+    // Actualiza el cupo agregado en la tabla
+    const event = this.events.find((e) => e.idActividad === idActividad);
+    if (event) {
+      event.cupo = cuposRestantes;
+      // Por limitación del API: aplicamos el mismo cupo a TODOS los horarios del evento
+      event.horarios.forEach((h) => {
+        const key = this.horarioKey(idActividad, h.idHorarioActividad);
+        this.cuposRestantesByHorarioKey.set(key, cuposRestantes);
+      });
+    }
+
+    // Si el modal está abierto para esta misma actividad, sincronizamos también ahí
+    if (this.selectedEvent?.idActividad === idActividad) {
+      this.selectedEvent.cupo = cuposRestantes;
+      this.selectedEvent.horarios.forEach((h) => {
+        const key = this.horarioKey(idActividad, h.idHorarioActividad);
+        this.cuposRestantesByHorarioKey.set(key, cuposRestantes);
+      });
+    }
   }
 
-  isUnregistering(eventId: string): boolean {
-    return this.unregisteringEventIds.has(eventId);
+  private setHorarioInscrito(idActividad: number, idHorarioActividad: number, value: boolean): void {
+    const key = this.horarioKey(idActividad, idHorarioActividad);
+    if (value) this.registeredHorarioKeys.add(key);
+    else this.registeredHorarioKeys.delete(key);
+
+    // Mutamos in-place para no romper referencias del modal abierto.
+    const event = this.events.find((e) => e.idActividad === idActividad);
+    if (event) {
+      const h = event.horarios.find((x) => x.idHorarioActividad === idHorarioActividad);
+      if (h) h.usuarioInscrito = value;
+      event.usuarioInscrito = event.horarios.some((x) => !!x.usuarioInscrito);
+    }
+
+    if (this.selectedEvent?.idActividad === idActividad) {
+      const h = this.selectedEvent.horarios.find((x) => x.idHorarioActividad === idHorarioActividad);
+      if (h) h.usuarioInscrito = value;
+      this.selectedEvent.usuarioInscrito = this.selectedEvent.horarios.some((x) => !!x.usuarioInscrito);
+    }
+  }
+
+  isRegisteredHorario(idActividad: number, idHorarioActividad: number): boolean {
+    return this.registeredHorarioKeys.has(this.horarioKey(idActividad, idHorarioActividad));
+  }
+
+  isRegisteringHorario(idActividad: number, idHorarioActividad: number): boolean {
+    return this.registeringHorarioKeys.has(this.horarioKey(idActividad, idHorarioActividad));
+  }
+
+  isUnregisteringHorario(idActividad: number, idHorarioActividad: number): boolean {
+    return this.unregisteringHorarioKeys.has(this.horarioKey(idActividad, idHorarioActividad));
+  }
+
+  getCuposRestantes(row: EventRow, horario: HorarioActividadBasicoDto): number {
+    const key = this.horarioKey(row.idActividad, horario.idHorarioActividad);
+    return this.cuposRestantesByHorarioKey.get(key) ?? row.cupo;
+  }
+
+  getDuracionHorario(horario: HorarioActividadBasicoDto): string {
+    return this.formatDuracion(null, horario.horaInicio, horario.horaFin);
   }
 
   private normalizeInscripcionResponse(resp: any): InscripcionActividadResponseDto {
@@ -191,8 +253,22 @@ export class InscriptionsComponent implements OnInit {
     };
   }
 
-  onRegister(row: EventRow): void {
-    if (this.isRegistered(row.id) || this.isRegistering(row.id) || this.isUnregistering(row.id)) return;
+  openHorarios(row: EventRow): void {
+    this.selectedEvent = row;
+    this.isHorariosModalOpen = true;
+    this.cdr.detectChanges();
+  }
+
+  closeHorariosModal(): void {
+    this.isHorariosModalOpen = false;
+    this.selectedEvent = null;
+    this.cdr.detectChanges();
+  }
+
+  onRegisterHorario(row: EventRow, horario: HorarioActividadBasicoDto): void {
+    const key = this.horarioKey(row.idActividad, horario.idHorarioActividad);
+    if (!!horario.usuarioInscrito) return;
+    if (this.registeringHorarioKeys.has(key) || this.unregisteringHorarioKeys.has(key)) return;
 
     const userId = this.authService.getUserId();
     if (!userId) {
@@ -203,15 +279,7 @@ export class InscriptionsComponent implements OnInit {
       return;
     }
 
-    if (!row.idHorarioActividad) {
-      this.modalTitle = 'No disponible';
-      this.modalMessage = 'Este evento no tiene horarios disponibles para inscribirse.';
-      this.isModalOpen = true;
-      this.cdr.detectChanges();
-      return;
-    }
-
-    this.registeringEventIds.add(row.id);
+    this.registeringHorarioKeys.add(key);
     this.cdr.detectChanges();
 
     this.eventsService
@@ -219,11 +287,11 @@ export class InscriptionsComponent implements OnInit {
         idUsuario: userId,
         idOrganizacion: row.idOrganizacion,
         idActividad: row.idActividad,
-        idHorarioActividad: row.idHorarioActividad,
+        idHorarioActividad: horario.idHorarioActividad,
       })
       .pipe(
         finalize(() => {
-          this.registeringEventIds.delete(row.id);
+          this.registeringHorarioKeys.delete(key);
           this.cdr.detectChanges();
         })
       )
@@ -231,17 +299,13 @@ export class InscriptionsComponent implements OnInit {
         next: (rawResp) => {
           const resp = this.normalizeInscripcionResponse(rawResp);
 
-          this.registeredEventIds.add(row.id);
+          const idActividad = resp.idActividad || row.idActividad;
+          const idHorarioActividad = resp.idHorarioActividad || horario.idHorarioActividad;
+          const respKey = this.horarioKey(idActividad, idHorarioActividad);
 
-          // Actualizamos el cupo mostrado con lo que retorna el backend.
-          const idx = this.events.findIndex((e) => e.id === row.id);
-          if (idx >= 0) {
-            this.events[idx] = {
-              ...this.events[idx],
-              cupo: resp.cuposRestantes,
-              usuarioInscrito: true,
-            };
-          }
+          this.setHorarioInscrito(idActividad, idHorarioActividad, true);
+          this.cuposRestantesByHorarioKey.set(respKey, resp.cuposRestantes);
+          this.applyCuposToActividad(idActividad, resp.cuposRestantes);
 
           const fechaTxt = resp.fechaInscripcion
             ? new Date(resp.fechaInscripcion).toLocaleString()
@@ -277,8 +341,10 @@ export class InscriptionsComponent implements OnInit {
       });
   }
 
-  onUnregister(row: EventRow): void {
-    if (!this.isRegistered(row.id) || this.isUnregistering(row.id) || this.isRegistering(row.id)) return;
+  onUnregisterHorario(row: EventRow, horario: HorarioActividadBasicoDto): void {
+    const key = this.horarioKey(row.idActividad, horario.idHorarioActividad);
+    if (!horario.usuarioInscrito) return;
+    if (this.unregisteringHorarioKeys.has(key) || this.registeringHorarioKeys.has(key)) return;
 
     const userId = this.authService.getUserId();
     if (!userId) {
@@ -289,15 +355,7 @@ export class InscriptionsComponent implements OnInit {
       return;
     }
 
-    if (!row.idHorarioActividad) {
-      this.modalTitle = 'No disponible';
-      this.modalMessage = 'Este evento no tiene horario asociado para desinscripción.';
-      this.isModalOpen = true;
-      this.cdr.detectChanges();
-      return;
-    }
-
-    this.unregisteringEventIds.add(row.id);
+    this.unregisteringHorarioKeys.add(key);
     this.cdr.detectChanges();
 
     this.eventsService
@@ -305,27 +363,25 @@ export class InscriptionsComponent implements OnInit {
         idUsuario: userId,
         idOrganizacion: row.idOrganizacion,
         idActividad: row.idActividad,
-        idHorarioActividad: row.idHorarioActividad,
+        idHorarioActividad: horario.idHorarioActividad,
       })
       .pipe(
         finalize(() => {
-          this.unregisteringEventIds.delete(row.id);
+          this.unregisteringHorarioKeys.delete(key);
           this.cdr.detectChanges();
         })
       )
       .subscribe({
         next: (rawResp) => {
-          this.registeredEventIds.delete(row.id);
-
           const resp = this.normalizeDesinscripcionResponse(rawResp);
-          const idx = this.events.findIndex((e) => e.id === row.id);
-          if (idx >= 0) {
-            this.events[idx] = {
-              ...this.events[idx],
-              cupo: resp.cuposRestantes,
-              usuarioInscrito: false,
-            };
-          }
+
+          const idActividad = resp.idActividad || row.idActividad;
+          const idHorarioActividad = resp.idHorarioActividad || horario.idHorarioActividad;
+          const respKey = this.horarioKey(idActividad, idHorarioActividad);
+
+          this.setHorarioInscrito(idActividad, idHorarioActividad, false);
+          this.cuposRestantesByHorarioKey.set(respKey, resp.cuposRestantes);
+          this.applyCuposToActividad(idActividad, resp.cuposRestantes);
 
           const fechaTxt = resp.fechaRetiro ? new Date(resp.fechaRetiro).toLocaleString() : null;
           this.modalTitle = 'Listo';
