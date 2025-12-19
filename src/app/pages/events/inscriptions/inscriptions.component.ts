@@ -6,6 +6,7 @@ import {
   type DesinscripcionActividadResponseDto,
   type EventDto,
   type EventRow,
+  type HorarioActividadBasicoDto,
   type InscripcionActividadResponseDto,
 } from '../../../models/EventRow';
 import { AuthService } from '../../../core/services/auth.service';
@@ -51,7 +52,14 @@ export class InscriptionsComponent implements OnInit {
     this.eventsService
       .getEvents(this.authService.getUserId() ?? 0)
       .pipe(
-        map((items) => items.map((dto) => this.toRow(dto))),
+        // Un row por cada horario disponible (actividad + horario)
+        map((items) =>
+          items.flatMap((dto) => {
+            const horarios = dto.horarios ?? [];
+            if (horarios.length === 0) return [];
+            return horarios.map((h) => this.toRow(dto, h));
+          })
+        ),
         catchError(() => {
           // Sin validación ni auth; si el API no está arriba todavía, dejamos 0 datos.
           this.loadError = null;
@@ -74,16 +82,22 @@ export class InscriptionsComponent implements OnInit {
       });
   }
 
-  private toRow(dto: EventDto): EventRow {
-    const hora = this.formatHora(dto.fechaInicio);
-    const duracion = this.formatDuracion(dto.horas, dto.fechaInicio, dto.fechaFin);
-    const firstHorarioId = dto.horarios?.[0]?.idHorarioActividad ?? null;
+  private toRow(dto: EventDto, horario: HorarioActividadBasicoDto | null): EventRow {
+    const rowId = horario ? `${dto.idActividad}-${horario.idHorarioActividad}` : `${dto.idActividad}-nohorario`;
+
+    const hora = horario
+      ? this.formatHorario(horario.fecha, horario.horaInicio, horario.horaFin)
+      : this.formatHora(dto.fechaInicio);
+
+    const duracion = horario
+      ? this.formatDuracion(null, horario.horaInicio, horario.horaFin)
+      : this.formatDuracion(dto.horas, dto.fechaInicio, dto.fechaFin);
 
     return {
-      id: String(dto.idActividad),
+      id: rowId,
       idActividad: dto.idActividad,
       idOrganizacion: dto.idOrganizacion,
-      idHorarioActividad: firstHorarioId,
+      idHorarioActividad: horario?.idHorarioActividad ?? null,
       usuarioInscrito: !!dto.usuarioInscrito,
       nombreEvento: dto.nombre || '—',
       cupo: dto.cupos ?? 0,
@@ -100,6 +114,29 @@ export class InscriptionsComponent implements OnInit {
     const d = new Date(fechaInicio);
     if (Number.isNaN(d.getTime())) return '—';
     return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  private formatFechaCorta(iso: string | null): string {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString();
+  }
+
+  private formatHoraSolo(iso: string | null): string {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return '—';
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  private formatHorario(fecha: string | null, inicio: string | null, fin: string | null): string {
+    const f = this.formatFechaCorta(fecha);
+    const hi = this.formatHoraSolo(inicio);
+    const hf = this.formatHoraSolo(fin);
+    if (f === '—' && hi === '—' && hf === '—') return '—';
+    if (hi !== '—' && hf !== '—') return `${f} ${hi} - ${hf}`;
+    return `${f} ${hi !== '—' ? hi : hf}`;
   }
 
   private formatDuracion(horas: number | null, inicio: string | null, fin: string | null): string {

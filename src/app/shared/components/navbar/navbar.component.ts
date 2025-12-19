@@ -72,13 +72,6 @@ import { AuthService } from '../../../core/services/auth.service';
                 >
                   Ver mis horas
                 </a>
-                <a
-                  routerLink="/certificates"
-                  routerLinkActive="bg-slate-100"
-                  class="block rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
-                >
-                  Certificados
-                </a>
                   <a
                   routerLink="/administration"
                   routerLinkActive="bg-slate-100"
