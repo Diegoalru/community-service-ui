@@ -58,7 +58,16 @@ export interface ActividadCreacionIntegracionDto {
   actividad: {
     idOrganizacion: number;
     idCategoria: number;
-    idUbicacion: number;
+    ubicacion: {
+      idPais: number;
+      idProvincia: number;
+      idCanton: number;
+      idDistrito: number;
+      direccion: string;
+      codigoPostal: string;
+      latitud: number;
+      longitud: number;
+    };
     nombre: string;
     descripcion: string;
     fechaInicio: string; // "YYYY-MM-DDTHH:mm:ss"
@@ -74,7 +83,16 @@ export interface ActividadActualizacionIntegracionDto {
     idActividad: number;
     idOrganizacion: number;
     idCategoria: number;
-    idUbicacion: number;
+    ubicacion: {
+      idPais: number;
+      idProvincia: number;
+      idCanton: number;
+      idDistrito: number;
+      direccion: string;
+      codigoPostal: string;
+      latitud: number;
+      longitud: number;
+    };
     nombre: string;
     descripcion: string;
     fechaInicio: string;
@@ -131,6 +149,7 @@ export interface UbicacionNestedDto {
   idCanton: number;
   idDistrito: number;
   direccion: string;
+  codigoPostal?: string;
 }
 
 export interface OrganizacionNestedDto {

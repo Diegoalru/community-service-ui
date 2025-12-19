@@ -70,19 +70,20 @@
                   <tr *ngFor="let usuario of filteredUsuarios" (click)="seleccionarUsuario(usuario)" class="cursor-pointer hover:bg-slate-50/60" [class.bg-blue-50]="usuarioSeleccionado?.idUsuario === usuario.idUsuario">
                     <td class="px-4 py-3"><p class="font-medium text-slate-900">{{ usuario.nombre || usuario.username }}</p><p class="text-xs text-slate-500">{{ usuario.username }}</p></td>
                   <td class="px-4 py-3">
-                    <!-- Si es Admin, Coordinador o Asistente, mostrar texto -->
-                    <div *ngIf="isAdministrativeUser(usuario); else rolDropdown">
+                    <!-- Si es Voluntario, mostrar texto (el botón de promover está en la columna de Acciones) -->
+                    <div *ngIf="usuario.idRol === 4; else rolDropdown">
                       <span class="text-sm font-medium text-slate-700">{{ getNombreRol(usuario.idRol) }}</span>
                     </div>
-                    <!-- Si es Voluntario, mostrar dropdown -->
+                    <!-- Si es Admin, Coordinador o Asistente, mostrar dropdown -->
                     <ng-template #rolDropdown>
                       <select
-                        class="rounded border border-slate-300 bg-white px-2 py-1 text-xs"
-                        [value]="usuario.idRol"
+                        class="rounded border border-slate-300 bg-white px-2 py-1 text-xs disabled:opacity-50"
+                        [ngModel]="usuario.idRol"
+                        [disabled]="updatingUserId === usuario.idUsuario"
                         (change)="cambiarRolUsuario(usuario, +$any($event.target).value)"
                         (click)="$event.stopPropagation()"
                       >
-                        <option *ngFor="let rol of rolesDisponibles" [value]="rol.id">
+                        <option *ngFor="let rol of rolesParaDropdown" [value]="rol.id">
                           {{ rol.nombre }}
                         </option>
                       </select>

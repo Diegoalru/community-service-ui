@@ -10,6 +10,7 @@ import {
   FormBuilder,
   Validators,
   ReactiveFormsModule,
+  FormsModule,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subject, forkJoin, of } from 'rxjs';
@@ -37,7 +38,7 @@ import { ActivityFormComponent } from './activity-form/activity-form.component';
 @Component({
   selector: 'app-administration',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, ActivityFormComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink, ActivityFormComponent],
   templateUrl: './administration.html',
   styleUrls: ['./administration.css'],
 })
@@ -69,12 +70,17 @@ export class AdministrationComponent implements OnInit, OnDestroy {
   usuarios: UsuarioDeOrganizacion[] = [];
   filteredUsuarios: UsuarioDeOrganizacion[] = [];
   usuarioSeleccionado: UsuarioDeOrganizacion | null = null;
+  updatingUserId: number | null = null;
   rolesDisponibles = [
     { id: 1, nombre: 'Administrador' },
     { id: 2, nombre: 'Coordinador' },
     { id: 3, nombre: 'Asistente' },
     { id: 4, nombre: 'Voluntario' },
   ];
+
+  get rolesParaDropdown() {
+    return this.rolesDisponibles.filter(r => r.id !== 4);
+  }
   miembrosSearchTerm = new Subject<string>();
 
   // --- Pestaña: Actividades ---
@@ -231,7 +237,7 @@ export class AdministrationComponent implements OnInit, OnDestroy {
         error: (err) => this.showError(err.error?.mensaje || 'Error al guardar los cambios.'),
       });
   }
-  
+
   // ============================ Miembros ============================
   private setupMiembrosSearch(): void {
     this.miembrosSearchTerm.pipe(
@@ -251,7 +257,7 @@ export class AdministrationComponent implements OnInit, OnDestroy {
     const term = (event.target as HTMLInputElement).value;
     this.miembrosSearchTerm.next(term);
   }
-  
+
   seleccionarUsuario(usuario: UsuarioDeOrganizacion): void {
     this.usuarioSeleccionado = usuario;
   }
@@ -265,18 +271,22 @@ export class AdministrationComponent implements OnInit, OnDestroy {
     const idUsuarioSolicitante = this.authService.getUserId();
     if (!idUsuarioSolicitante) return;
 
+    this.updatingUserId = usuario.idUsuario;
     this.adminPanelService.cambiarRolUsuario({
       idUsuarioSolicitante,
       idRolUsuarioOrganizacion: usuario.idRolUsuarioOrganizacion,
       idNuevoRol: nuevoRolId,
     })
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.updatingUserId = null)
+      )
       .subscribe({
         next: () => { this.showSuccess('Rol actualizado correctamente.'); this.recargarUsuarios(); },
         error: (err) => this.showError(err.error?.mensaje || 'Error al cambiar el rol.'),
       });
   }
-  
+
   confirmarEliminarUsuario(usuario: UsuarioDeOrganizacion): void {
     this.openConfirmModal(
       'Eliminar Miembro',
@@ -284,7 +294,7 @@ export class AdministrationComponent implements OnInit, OnDestroy {
       () => this.eliminarUsuario(usuario)
     );
   }
-  
+
   promoverVoluntario(usuario: UsuarioDeOrganizacion): void {
     this.openConfirmModal(
       'Promover Voluntario',
@@ -343,7 +353,7 @@ export class AdministrationComponent implements OnInit, OnDestroy {
     this.isActivityFormVisible = false;
     this.selectedActivity = null;
   }
-  
+
   confirmarEliminarActividad(actividad: ActividadRow): void {
     this.openConfirmModal(
       'Eliminar Actividad',
@@ -355,7 +365,7 @@ export class AdministrationComponent implements OnInit, OnDestroy {
   private eliminarActividad(actividad: ActividadRow): void {
     const idUsuarioSolicitante = this.authService.getUserId();
     if (!idUsuarioSolicitante) return;
-    
+
     this.adminPanelService.eliminarActividad({ idUsuarioSolicitante, idActividad: actividad.idActividad })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
