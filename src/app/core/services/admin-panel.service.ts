@@ -106,7 +106,13 @@ export class AdminPanelService {
    * Obtiene las categorías de actividades disponibles
    */
   getCategoriasActividad(): Observable<CategoriaActividad[]> {
-    return this.api.get<CategoriaActividad[]>('/CategoriasActividad');
+    return this.api.get<any[]>('/CategoriasActividad').pipe(
+      map(categorias => categorias.map(cat => ({
+        idCategoria: cat.idCategoria ?? cat.id_categoria,
+        nombre: cat.nombre,
+        descripcion: cat.descripcion
+      })))
+    );
   }
 
   /**
