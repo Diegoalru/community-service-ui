@@ -14,6 +14,7 @@ import {
   EliminarActividadDto,
   EliminarHorarioDto,
   ActividadCreacionIntegracionDto,
+  ActividadActualizacionIntegracionDto,
   HorarioActividadCreateDto,
   OrganizacionConEstadoApi,
   OrganizacionConEstado,
@@ -113,6 +114,13 @@ export class AdminPanelService {
    */
   crearActividad(dto: ActividadCreacionIntegracionDto): Observable<ApiMensajeAdmin> {
     return this.api.post<ApiMensajeAdmin>('/Integracion/CrearActividad', dto);
+  }
+
+  /**
+   * Actualiza una actividad existente
+   */
+  actualizarActividad(dto: ActividadActualizacionIntegracionDto): Observable<ApiMensajeAdmin> {
+    return this.api.put<ApiMensajeAdmin>('/Integracion/ActualizarActividad', dto);
   }
 
   /**

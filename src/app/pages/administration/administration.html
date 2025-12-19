@@ -1,233 +1,92 @@
-<div class="mx-auto max-w-6xl px-6 py-8">
-  <!-- Header de página -->
-  <div class="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-    <div>
-      <h1 class="text-2xl font-semibold text-slate-900">Panel de Administración</h1>
-      <p class="mt-1 text-sm text-slate-600">{{ nombreOrganizacion }}</p>
-    </div>
-
-    <a
-      routerLink="/organizations"
-      class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-    >
-      ← Volver a organizaciones
-    </a>
+<!-- Header de página -->
+<div class="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+  <div>
+    <h1 class="text-2xl font-semibold text-slate-900">Panel de Administración</h1>
+    <p class="mt-1 text-sm text-slate-600">{{ nombreOrganizacion }}</p>
   </div>
+  <a routerLink="/organizations" class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+    ← Volver a organizaciones
+  </a>
+</div>
 
-  <!-- Mensajes de éxito/error -->
-  <div *ngIf="successMessage" class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
-    <strong>✓</strong> {{ successMessage }}
-  </div>
-  <div *ngIf="loadError" class="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-    <strong>!</strong> {{ loadError }}
-  </div>
+<!-- Mensajes -->
+<div *ngIf="successMessage" class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700"><strong>✓</strong> {{ successMessage }}</div>
+<div *ngIf="loadError" class="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700"><strong>!</strong> {{ loadError }}</div>
+<div *ngIf="isLoading && !usuarios.length" class="mb-4 text-center text-sm text-slate-500">Cargando...</div>
 
-  <!-- Loading -->
-  <div *ngIf="isLoading" class="mb-4 text-center text-sm text-slate-500">
-    Cargando...
-  </div>
+<!-- Pestañas de Navegación -->
+<div class="mb-6 border-b border-slate-200">
+  <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+    <button (click)="selectTab('configuracion')" [ngClass]="{'border-indigo-500 text-indigo-600': activeTab === 'configuracion', 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700': activeTab !== 'configuracion'}" class="whitespace-nowrap border-b-2 px-1 py-3 text-sm font-medium">Configuración</button>
+    <button (click)="selectTab('miembros')" [ngClass]="{'border-indigo-500 text-indigo-600': activeTab === 'miembros', 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700': activeTab !== 'miembros'}" class="whitespace-nowrap border-b-2 px-1 py-3 text-sm font-medium">Miembros</button>
+    <button (click)="selectTab('actividades')" [ngClass]="{'border-indigo-500 text-indigo-600': activeTab === 'actividades', 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700': activeTab !== 'actividades'}" class="whitespace-nowrap border-b-2 px-1 py-3 text-sm font-medium">Actividades</button>
+  </nav>
+</div>
 
-  <!-- ==================== SECCIÓN MIEMBROS ==================== -->
-  <div class="section mb-4 rounded-xl border border-slate-200 bg-white shadow-sm">
-    <div
-      class="section-header flex cursor-pointer items-center justify-between border-b border-slate-200 px-5 py-4 hover:bg-slate-50"
-      (click)="toggleSection('configuracion')"
-    >
-      <h2 class="flex items-center gap-2 text-base font-semibold text-slate-900">
-        <span class="text-xs">{{ sections.configuracion ? '▼' : '►' }}</span>
-        Configuración de la Organización
-      </h2>
-    </div>
+<!-- Contenido de las Pestañas -->
+<div [ngSwitch]="activeTab">
 
-    <div class="section-content" *ngIf="sections.configuracion">
-      <div class="p-5">
-        <form [formGroup]="organizacionForm" (ngSubmit)="guardarConfiguracion()">
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <!-- Nombre -->
-            <div class="form-group md:col-span-2">
-              <label class="mb-1 block text-xs font-medium text-slate-700">Nombre de la Organización *</label>
-              <input
-                type="text"
-                formControlName="nombre"
-                placeholder="Nombre de la organización"
-                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                formGroupName="organizacion"
-              />
-            </div>
-
-            <!-- Descripción -->
-            <div class="form-group md:col-span-2">
-              <label class="mb-1 block text-xs font-medium text-slate-700">Descripción</label>
-              <textarea
-                formControlName="descripcion"
-                placeholder="Descripción breve de la organización"
-                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                rows="3"
-                formGroupName="organizacion"
-              ></textarea>
-            </div>
-
-            <!-- Universidad -->
-            <div class="form-group md:col-span-2">
-              <label class="mb-1 block text-xs font-medium text-slate-700">Universidad Afiliada *</label>
-              <select
-                formControlName="idUniversidad"
-                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                formGroupName="organizacion"
-              >
-                <option [ngValue]="null" disabled>Selecciona una universidad...</option>
-                <option *ngFor="let uni of universidades" [ngValue]="uni.idUniversidad">
-                  {{ uni.nombre }}
-                </option>
-              </select>
-            </div>
+  <!-- ==================== PESTAÑA CONFIGURACIÓN ==================== -->
+  <div *ngSwitchCase="'configuracion'">
+    <form [formGroup]="organizacionForm" (ngSubmit)="guardarConfiguracion()">
+      <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div class="border-b border-slate-200 px-5 py-4"><h2 class="text-base font-semibold text-slate-900">Perfil de la Organización</h2></div>
+        <div class="p-5">
+          <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div class="form-group md:col-span-2" formGroupName="organizacion"><label class="mb-1 block text-sm font-medium text-slate-700">Nombre *</label><input type="text" formControlName="nombre" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"></div>
+            <div class="form-group md:col-span-2" formGroupName="organizacion"><label class="mb-1 block text-sm font-medium text-slate-700">Descripción</label><textarea formControlName="descripcion" rows="3" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"></textarea></div>
+            <div class="form-group md:col-span-2" formGroupName="organizacion"><label class="mb-1 block text-sm font-medium text-slate-700">Universidad Afiliada *</label><select formControlName="idUniversidad" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"><option [ngValue]="null" disabled>Selecciona...</option><option *ngFor="let uni of universidades" [ngValue]="uni.idUniversidad">{{ uni.nombre }}</option></select></div>
           </div>
-
-          <!-- Ubicación -->
-          <div class="mt-4 border-t border-slate-200 pt-4" formGroupName="ubicacion">
-            <h4 class="mb-3 text-xs font-semibold text-slate-700">Ubicación</h4>
+          <div class="mt-5 border-t border-slate-200 pt-5" formGroupName="ubicacion">
+            <h3 class="mb-3 text-sm font-semibold text-slate-800">Ubicación</h3>
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <!-- País -->
-              <div class="form-group">
-                <label class="mb-1 block text-xs font-medium text-slate-700">País *</label>
-                <select
-                  formControlName="idPais"
-                  class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                >
-                  <option [ngValue]="null" disabled>Selecciona...</option>
-                  <option *ngFor="let p of paises" [ngValue]="p.idPais">
-                    {{ p.nombre }}
-                  </option>
-                </select>
-              </div>
-
-              <!-- Provincia -->
-              <div class="form-group">
-                <label class="mb-1 block text-xs font-medium text-slate-700">Provincia *</label>
-                <select
-                  formControlName="idProvincia"
-                  class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:bg-slate-100"
-                >
-                  <option [ngValue]="null" disabled>
-                    {{ loadingProvincias ? 'Cargando...' : 'Selecciona...' }}
-                  </option>
-                  <option *ngFor="let p of provincias" [ngValue]="p.id">
-                    {{ p.nombre }}
-                  </option>
-                </select>
-              </div>
-
-              <!-- Cantón -->
-              <div class="form-group">
-                <label class="mb-1 block text-xs font-medium text-slate-700">Cantón *</label>
-                <select
-                  formControlName="idCanton"
-                  class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:bg-slate-100"
-                >
-                  <option [ngValue]="null" disabled>
-                    {{ loadingCantones ? 'Cargando...' : 'Selecciona...' }}
-                  </option>
-                  <option *ngFor="let c of cantones" [ngValue]="c.id">
-                    {{ c.nombre }}
-                  </option>
-                </select>
-              </div>
-
-              <!-- Distrito -->
-              <div class="form-group">
-                <label class="mb-1 block text-xs font-medium text-slate-700">Distrito *</label>
-                <select
-                  formControlName="idDistrito"
-                  class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:bg-slate-100"
-                >
-                  <option [ngValue]="null" disabled>
-                    {{ loadingDistritos ? 'Cargando...' : 'Selecciona...' }}
-                  </option>
-                  <option *ngFor="let d of distritos" [ngValue]="d.id">
-                    {{ d.nombre }}
-                  </option>
-                </select>
-              </div>
-
-              <!-- Dirección -->
-              <div class="form-group md:col-span-4">
-                <label class="mb-1 block text-xs font-medium text-slate-700">Dirección</label>
-                <input
-                  type="text"
-                  formControlName="direccion"
-                  placeholder="Dirección exacta (opcional)"
-                  class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                />
-              </div>
+              <div class="form-group"><label class="mb-1 block text-xs font-medium text-slate-700">País *</label><select formControlName="idPais" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"><option [ngValue]="null" disabled>Selecciona...</option><option *ngFor="let p of paises" [ngValue]="p.idPais">{{ p.nombre }}</option></select></div>
+              <div class="form-group"><label class="mb-1 block text-xs font-medium text-slate-700">Provincia *</label><select formControlName="idProvincia" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:bg-slate-100"><option [ngValue]="null" disabled>{{ loadingProvincias ? 'Cargando...' : 'Selecciona...' }}</option><option *ngFor="let p of provincias" [ngValue]="p.id">{{ p.nombre }}</option></select></div>
+              <div class="form-group"><label class="mb-1 block text-xs font-medium text-slate-700">Cantón *</label><select formControlName="idCanton" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:bg-slate-100"><option [ngValue]="null" disabled>{{ loadingCantones ? 'Cargando...' : 'Selecciona...' }}</option><option *ngFor="let c of cantones" [ngValue]="c.id">{{ c.nombre }}</option></select></div>
+              <div class="form-group"><label class="mb-1 block text-xs font-medium text-slate-700">Distrito *</label><select formControlName="idDistrito" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:bg-slate-100"><option [ngValue]="null" disabled>{{ loadingDistritos ? 'Cargando...' : 'Selecciona...' }}</option><option *ngFor="let d of distritos" [ngValue]="d.id">{{ d.nombre }}</option></select></div>
+              <div class="form-group md:col-span-4"><label class="mb-1 block text-xs font-medium text-slate-700">Dirección</label><input type="text" formControlName="direccion" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"></div>
             </div>
           </div>
-
-          <!-- Botón submit -->
-          <div class="mt-6 flex justify-end">
-            <button
-              type="submit"
-              [disabled]="isLoading || organizacionForm.pristine || !organizacionForm.valid"
-              class="rounded-lg bg-blue-600 px-6 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {{ isLoading ? 'Guardando...' : 'Guardar Cambios' }}
-            </button>
-          </div>
-        </form>
+        </div>
+        <div class="flex justify-end border-t border-slate-200 bg-slate-50 px-5 py-3"><button type="submit" [disabled]="isLoading || organizacionForm.pristine || !organizacionForm.valid" class="rounded-lg bg-blue-600 px-6 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50">{{ isLoading ? 'Guardando...' : 'Guardar Cambios' }}</button></div>
       </div>
-    </div>
+    </form>
   </div>
 
-  <!-- ==================== SECCIÓN MIEMBROS ==================== -->
-  <div class="section mb-4 rounded-xl border border-slate-200 bg-white shadow-sm">
-    <div
-      class="section-header flex cursor-pointer items-center justify-between border-b border-slate-200 px-5 py-4 hover:bg-slate-50"
-      (click)="toggleSection('miembros')"
-    >
-      <h2 class="flex items-center gap-2 text-base font-semibold text-slate-900">
-        <span class="text-xs">{{ sections.miembros ? '▼' : '►' }}</span>
-        Miembros de la Organización
-      </h2>
-      <span class="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700">
-        {{ usuarios.length }} usuarios
-      </span>
-    </div>
-
-    <div class="section-content" *ngIf="sections.miembros">
-      <div class="grid grid-cols-1 gap-4 p-5 lg:grid-cols-12">
-        <!-- Tabla de usuarios -->
-        <div class="lg:col-span-7">
-          <div class="max-h-[50vh] overflow-auto rounded-lg border border-slate-200">
-            <table class="min-w-full text-left text-sm">
-              <thead class="sticky top-0 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600">
-                <tr>
-                  <th class="px-4 py-3">Usuario</th>
-                  <th class="px-4 py-3">Rol</th>
-                  <th class="px-4 py-3">Estado</th>
-                  <th class="px-4 py-3 text-right">Acciones</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-200">
-                <tr
-                  *ngFor="let usuario of usuarios"
-                  class="cursor-pointer hover:bg-slate-50/60"
-                  [class.bg-blue-50]="usuarioSeleccionado?.idUsuario === usuario.idUsuario"
-                  (click)="seleccionarUsuario(usuario)"
-                >
+  <!-- ==================== PESTAÑA MIEMBROS ==================== -->
+  <div *ngSwitchCase="'miembros'">
+    <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div class="border-b border-slate-200 px-5 py-4"><h2 class="text-base font-semibold text-slate-900">Miembros de la Organización</h2></div>
+      <div class="p-5">
+        <div class="mb-4"><input type="text" placeholder="Buscar por nombre o usuario..." (input)="onMiembrosSearch($event)" class="w-full max-w-sm rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none"></div>
+        <div class="grid grid-cols-1 gap-4 lg:grid-cols-12">
+          <div class="lg:col-span-7">
+            <div class="max-h-[60vh] overflow-auto rounded-lg border border-slate-200">
+              <table class="min-w-full text-left text-sm">
+                <thead class="sticky top-0 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                  <tr><th class="px-4 py-3">Usuario</th><th class="px-4 py-3">Rol</th><th class="px-4 py-3">Estado</th><th class="px-4 py-3 text-right">Acciones</th></tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                  <tr *ngFor="let usuario of filteredUsuarios" (click)="seleccionarUsuario(usuario)" class="cursor-pointer hover:bg-slate-50/60" [class.bg-blue-50]="usuarioSeleccionado?.idUsuario === usuario.idUsuario">
+                    <td class="px-4 py-3"><p class="font-medium text-slate-900">{{ usuario.nombre || usuario.username }}</p><p class="text-xs text-slate-500">{{ usuario.username }}</p></td>
                   <td class="px-4 py-3">
-                    <p class="font-medium text-slate-900">{{ usuario.nombre || usuario.username }}</p>
-                    <p class="text-xs text-slate-500">{{ usuario.username }}</p>
-                  </td>
-                  <td class="px-4 py-3">
-                    <select
-                      class="rounded border border-slate-300 bg-white px-2 py-1 text-xs"
-                      [value]="usuario.idRol"
-                      (change)="cambiarRolUsuario(usuario, +$any($event.target).value)"
-                      (click)="$event.stopPropagation()"
-                    >
-                      <option *ngFor="let rol of rolesDisponibles" [value]="rol.id">
-                        {{ rol.nombre }}
-                      </option>
-                    </select>
+                    <!-- Si es Voluntario (Rol 4) -->
+                    <div *ngIf="usuario.idRol === 4; else rolDropdown">
+                      <span class="text-sm font-medium text-slate-700">Voluntario</span>
+                    </div>
+                    <!-- Para otros roles, mostrar dropdown -->
+                    <ng-template #rolDropdown>
+                      <select
+                        class="rounded border border-slate-300 bg-white px-2 py-1 text-xs"
+                        [value]="usuario.idRol"
+                        (change)="cambiarRolUsuario(usuario, +$any($event.target).value)"
+                        (click)="$event.stopPropagation()"
+                      >
+                        <option *ngFor="let rol of rolesDisponibles" [value]="rol.id">
+                          {{ rol.nombre }}
+                        </option>
+                      </select>
+                    </ng-template>
                   </td>
                   <td class="px-4 py-3">
                     <span
@@ -241,473 +100,99 @@
                     </span>
                   </td>
                   <td class="px-4 py-3 text-right">
+                    <!-- Botón de Promover para Voluntarios -->
+                    <button
+                      *ngIf="usuario.idRol === 4"
+                      type="button"
+                      class="rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-200"
+                      (click)="promoverVoluntario(usuario); $event.stopPropagation()"
+                    >
+                      Promover a Asistente
+                    </button>
+                    <!-- Botón de Eliminar para todos -->
                     <button
                       type="button"
-                      class="rounded bg-red-100 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-200"
+                      class="ml-2 rounded bg-red-100 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-200"
                       (click)="confirmarEliminarUsuario(usuario); $event.stopPropagation()"
                     >
                       Eliminar
                     </button>
                   </td>
                 </tr>
-                <tr *ngIf="usuarios.length === 0">
+                <tr *ngIf="filteredUsuarios.length === 0">
                   <td colspan="4" class="px-4 py-8 text-center text-slate-500">
-                    No hay miembros en esta organización.
+                    No se encontraron miembros.
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
-
-        <!-- Detalle del usuario seleccionado -->
-        <div class="lg:col-span-5">
-          <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
-            <h3 class="mb-3 text-sm font-semibold text-slate-900">Detalle del usuario</h3>
-            <div *ngIf="usuarioSeleccionado; else noUserSelected" class="space-y-2 text-sm text-slate-700">
-              <p><strong>Nombre:</strong> {{ usuarioSeleccionado.nombre }} {{ usuarioSeleccionado.apellidoP }} {{ usuarioSeleccionado.apellidoM }}</p>
-              <p><strong>Usuario:</strong> {{ usuarioSeleccionado.username }}</p>
-              <p><strong>Rol:</strong> {{ getNombreRol(usuarioSeleccionado.idRol) }}</p>
-              <p><strong>Estado:</strong> {{ usuarioSeleccionado.isActivo ? 'Activo' : 'Inactivo' }}</p>
+          <div class="lg:col-span-5">
+             <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <h3 class="mb-3 text-sm font-semibold text-slate-900">Detalle del usuario</h3>
+              <div *ngIf="usuarioSeleccionado; else noUserSelected" class="space-y-2 text-sm text-slate-700">
+                <p><strong>Nombre:</strong> {{ usuarioSeleccionado.nombre }} {{ usuarioSeleccionado.apellidoP }} {{ usuarioSeleccionado.apellidoM }}</p>
+                <p><strong>Usuario:</strong> {{ usuarioSeleccionado.username }}</p>
+                <p><strong>Rol:</strong> {{ getNombreRol(usuarioSeleccionado.idRol) }}</p>
+                <p><strong>Estado:</strong> {{ usuarioSeleccionado.isActivo ? 'Activo' : 'Inactivo' }}</p>
+              </div>
+              <ng-template #noUserSelected><p class="text-sm text-slate-500">Selecciona un usuario de la lista para ver sus detalles.</p></ng-template>
             </div>
-            <ng-template #noUserSelected>
-              <p class="text-sm text-slate-500">Selecciona un usuario de la lista para ver sus detalles.</p>
-            </ng-template>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ==================== SECCIÓN ACTIVIDADES ==================== -->
-  <div class="section mb-4 rounded-xl border border-slate-200 bg-white shadow-sm">
-    <div
-      class="section-header flex cursor-pointer items-center justify-between border-b border-slate-200 px-5 py-4 hover:bg-slate-50"
-      (click)="toggleSection('actividades')"
-    >
-      <h2 class="flex items-center gap-2 text-base font-semibold text-slate-900">
-        <span class="text-xs">{{ sections.actividades ? '▼' : '►' }}</span>
-        Actividades
-      </h2>
-      <span class="rounded-full bg-indigo-100 px-3 py-1 text-xs font-medium text-indigo-700">
-        {{ actividades.length }} actividades
-      </span>
-    </div>
-
-    <div class="section-content" *ngIf="sections.actividades">
+  <!-- ==================== PESTAÑA ACTIVIDADES ==================== -->
+  <div *ngSwitchCase="'actividades'">
+    <div *ngIf="!isActivityFormVisible" class="rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4"><h2 class="text-base font-semibold text-slate-900">Actividades Existentes</h2><button (click)="showCreateActivityForm()" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">+ Crear Actividad</button></div>
       <div class="p-5">
-        <!-- Formulario de nueva actividad -->
-        <div class="mb-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
-          <h3 class="mb-4 text-sm font-semibold text-slate-900">Crear nueva actividad</h3>
-          <form [formGroup]="actividadForm" (ngSubmit)="crearActividad()">
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <!-- Nombre -->
-              <div class="form-group">
-                <label class="mb-1 block text-xs font-medium text-slate-700">Nombre *</label>
-                <input
-                  type="text"
-                  formControlName="nombre"
-                  placeholder="Nombre de la actividad"
-                  class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                />
-              </div>
-
-              <!-- Categoría -->
-              <div class="form-group">
-                <label class="mb-1 block text-xs font-medium text-slate-700">Categoría *</label>
-                <select
-                  formControlName="idCategoria"
-                  class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                >
-                  <option [ngValue]="null" disabled>Selecciona...</option>
-                  <option *ngFor="let cat of categorias" [ngValue]="cat.idCategoria">
-                    {{ cat.nombre }}
-                  </option>
-                </select>
-              </div>
-
-              <!-- Descripción -->
-              <div class="form-group md:col-span-2">
-                <label class="mb-1 block text-xs font-medium text-slate-700">Descripción</label>
-                <input
-                  type="text"
-                  formControlName="descripcion"
-                  placeholder="Descripción breve de la actividad"
-                  class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                />
-              </div>
-
-              <!-- Fecha inicio -->
-              <div class="form-group">
-                <label class="mb-1 block text-xs font-medium text-slate-700">Fecha/Hora Inicio *</label>
-                <input
-                  type="datetime-local"
-                  formControlName="fechaInicio"
-                  class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                />
-              </div>
-
-              <!-- Fecha fin -->
-              <div class="form-group">
-                <label class="mb-1 block text-xs font-medium text-slate-700">Fecha/Hora Fin *</label>
-                <input
-                  type="datetime-local"
-                  formControlName="fechaFin"
-                  class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                />
-              </div>
-
-              <!-- Horas -->
-              <div class="form-group">
-                <label class="mb-1 block text-xs font-medium text-slate-700">Horas *</label>
-                <input
-                  type="number"
-                  formControlName="horas"
-                  min="1"
-                  class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                />
-              </div>
-
-              <!-- Cupos -->
-              <div class="form-group">
-                <label class="mb-1 block text-xs font-medium text-slate-700">Cupos *</label>
-                <input
-                  type="number"
-                  formControlName="cupos"
-                  min="1"
-                  class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <!-- Ubicación -->
-            <div class="mt-4 border-t border-slate-200 pt-4">
-              <h4 class="mb-3 text-xs font-semibold text-slate-700">Ubicación</h4>
-              <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <!-- País -->
-                <div class="form-group">
-                  <label class="mb-1 block text-xs font-medium text-slate-700">País *</label>
-                  <select
-                    formControlName="pais"
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                  >
-                    <option [ngValue]="null" disabled>Selecciona...</option>
-                    <option *ngFor="let p of paises" [ngValue]="p.idPais">
-                      {{ p.nombre }}
-                    </option>
-                  </select>
-                </div>
-
-                <!-- Provincia -->
-                <div class="form-group">
-                  <label class="mb-1 block text-xs font-medium text-slate-700">Provincia *</label>
-                  <select
-                    formControlName="provincia"
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:bg-slate-100"
-                  >
-                    <option [ngValue]="null" disabled>
-                      {{ loadingProvincias ? 'Cargando...' : 'Selecciona...' }}
-                    </option>
-                    <option *ngFor="let p of provincias" [ngValue]="p.id">
-                      {{ p.nombre }}
-                    </option>
-                  </select>
-                </div>
-
-                <!-- Cantón -->
-                <div class="form-group">
-                  <label class="mb-1 block text-xs font-medium text-slate-700">Cantón *</label>
-                  <select
-                    formControlName="canton"
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:bg-slate-100"
-                  >
-                    <option [ngValue]="null" disabled>
-                      {{ loadingCantones ? 'Cargando...' : 'Selecciona...' }}
-                    </option>
-                    <option *ngFor="let c of cantones" [ngValue]="c.id">
-                      {{ c.nombre }}
-                    </option>
-                  </select>
-                </div>
-
-                <!-- Distrito -->
-                <div class="form-group">
-                  <label class="mb-1 block text-xs font-medium text-slate-700">Distrito *</label>
-                  <select
-                    formControlName="distrito"
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:bg-slate-100"
-                  >
-                    <option [ngValue]="null" disabled>
-                      {{ loadingDistritos ? 'Cargando...' : 'Selecciona...' }}
-                    </option>
-                    <option *ngFor="let d of distritos" [ngValue]="d.id">
-                      {{ d.nombre }}
-                    </option>
-                  </select>
-                </div>
-
-                <!-- Dirección -->
-                <div class="form-group md:col-span-2">
-                  <label class="mb-1 block text-xs font-medium text-slate-700">Dirección</label>
-                  <input
-                    type="text"
-                    formControlName="direccion"
-                    placeholder="Dirección exacta (opcional)"
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                  />
-                </div>
-
-                <!-- Código postal -->
-                <div class="form-group">
-                  <label class="mb-1 block text-xs font-medium text-slate-700">Código Postal</label>
-                  <input
-                    type="text"
-                    formControlName="codigoPostal"
-                    placeholder="Ej: 10101"
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <!-- Correo de organización -->
-            <div class="mt-4 border-t border-slate-200 pt-4">
-              <h4 class="mb-3 text-xs font-semibold text-slate-700">Correo de contacto de la organización</h4>
-              <div class="flex flex-wrap items-end gap-4">
-                <div class="form-group flex-1">
-                  <label class="mb-1 block text-xs font-medium text-slate-700">Correo electrónico</label>
-                  <input
-                    type="email"
-                    formControlName="correoOrg"
-                    placeholder="correo@organizacion.com"
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                  />
-                </div>
-                <label class="flex items-center gap-2 pb-2">
-                  <input type="checkbox" formControlName="consentimientoCorreo" class="rounded" />
-                  <span class="text-xs text-slate-600">Acepto recibir notificaciones</span>
-                </label>
-              </div>
-            </div>
-
-            <!-- Botón submit -->
-            <div class="mt-4 flex justify-end">
-              <button
-                type="submit"
-                [disabled]="isLoading"
-                class="rounded-lg bg-blue-600 px-6 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
-              >
-                {{ isLoading ? 'Creando...' : 'Crear Actividad' }}
-              </button>
-            </div>
-          </form>
-        </div>
-
-        <!-- Lista de actividades existentes -->
-        <h3 class="mb-3 text-sm font-semibold text-slate-900">Actividades existentes</h3>
         <div class="overflow-auto rounded-lg border border-slate-200">
           <table class="min-w-full text-left text-sm">
             <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600">
-              <tr>
-                <th class="px-4 py-3">Nombre</th>
-                <th class="px-4 py-3">Fecha Inicio</th>
-                <th class="px-4 py-3">Fecha Fin</th>
-                <th class="px-4 py-3">Horas</th>
-                <th class="px-4 py-3">Cupos</th>
-                <th class="px-4 py-3 text-right">Acciones</th>
-              </tr>
+              <tr><th class="px-4 py-3">Nombre</th><th class="px-4 py-3">Fechas</th><th class="px-4 py-3">Horas</th><th class="px-4 py-3 text-right">Acciones</th></tr>
             </thead>
             <tbody class="divide-y divide-slate-200">
               <tr *ngFor="let actividad of actividades" class="hover:bg-slate-50/60">
                 <td class="px-4 py-3 font-medium text-slate-900">{{ actividad.nombre }}</td>
-                <td class="px-4 py-3 text-slate-600">{{ formatDate(actividad.fechaInicio) }}</td>
-                <td class="px-4 py-3 text-slate-600">{{ formatDate(actividad.fechaFin) }}</td>
+                <td class="px-4 py-3 text-slate-600">{{ formatDate(actividad.fechaInicio) }} - {{ formatDate(actividad.fechaFin) }}</td>
                 <td class="px-4 py-3 text-slate-600">{{ actividad.horas }}</td>
-                <td class="px-4 py-3 text-slate-600">{{ actividad.cupos }}</td>
-                <td class="px-4 py-3 text-right">
-                  <button
-                    type="button"
-                    class="rounded bg-red-100 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-200"
-                    (click)="confirmarEliminarActividad(actividad)"
-                  >
-                    Eliminar
-                  </button>
+                <td class="space-x-2 px-4 py-3 text-right">
+                  <button type="button" (click)="showEditActivityForm(actividad)" class="rounded bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-200">Editar</button>
+                  <button type="button" (click)="confirmarEliminarActividad(actividad)" class="rounded bg-red-100 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-200">Eliminar</button>
                 </td>
               </tr>
-              <tr *ngIf="actividades.length === 0">
-                <td colspan="6" class="px-4 py-8 text-center text-slate-500">
-                  No hay actividades creadas.
-                </td>
-              </tr>
+              <tr *ngIf="actividades.length === 0"><td colspan="5" class="px-4 py-8 text-center text-slate-500">No hay actividades creadas.</td></tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- ==================== SECCIÓN HORARIOS ==================== -->
-  <div class="section mb-4 rounded-xl border border-slate-200 bg-white shadow-sm">
-    <div
-      class="section-header flex cursor-pointer items-center justify-between border-b border-slate-200 px-5 py-4 hover:bg-slate-50"
-      (click)="toggleSection('horarios')"
-    >
-      <h2 class="flex items-center gap-2 text-base font-semibold text-slate-900">
-        <span class="text-xs">{{ sections.horarios ? '▼' : '►' }}</span>
-        Horarios de Actividades
-      </h2>
-      <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
-        {{ horarios.length }} horarios
-      </span>
-    </div>
-
-    <div class="section-content" *ngIf="sections.horarios">
-      <div class="p-5">
-        <!-- Selector de actividad -->
-        <div class="mb-4">
-          <label class="mb-2 block text-sm font-medium text-slate-700">Selecciona una actividad</label>
-          <select
-            class="w-full max-w-md rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-            [value]="actividadSeleccionadaHorario"
-            (change)="onActividadHorarioChange(+$any($event.target).value)"
-          >
-            <option [ngValue]="null" disabled selected>Selecciona una actividad...</option>
-            <option *ngFor="let act of actividades" [value]="act.idActividad">
-              {{ act.nombre }}
-            </option>
-          </select>
-        </div>
-
-        <!-- Contenido cuando hay actividad seleccionada -->
-        <div *ngIf="actividadSeleccionadaHorario">
-          <!-- Formulario para agregar horario -->
-          <div class="mb-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
-            <h4 class="mb-3 text-sm font-semibold text-slate-900">Agregar nuevo horario</h4>
-            <form [formGroup]="horarioForm" (ngSubmit)="agregarHorario()" class="flex flex-wrap items-end gap-4">
-              <div class="form-group">
-                <label class="mb-1 block text-xs font-medium text-slate-700">Fecha *</label>
-                <input
-                  type="date"
-                  formControlName="fecha"
-                  class="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                />
-              </div>
-              <div class="form-group">
-                <label class="mb-1 block text-xs font-medium text-slate-700">Hora Inicio *</label>
-                <input
-                  type="time"
-                  formControlName="horaInicio"
-                  class="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                />
-              </div>
-              <div class="form-group">
-                <label class="mb-1 block text-xs font-medium text-slate-700">Hora Fin *</label>
-                <input
-                  type="time"
-                  formControlName="horaFin"
-                  class="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                />
-              </div>
-              <div class="form-group flex-1">
-                <label class="mb-1 block text-xs font-medium text-slate-700">Descripción</label>
-                <input
-                  type="text"
-                  formControlName="descripcion"
-                  placeholder="Descripción opcional"
-                  class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                />
-              </div>
-              <button
-                type="submit"
-                [disabled]="isLoading"
-                class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
-              >
-                + Agregar Horario
-              </button>
-            </form>
-          </div>
-
-          <!-- Tabla de horarios -->
-          <h4 class="mb-3 text-sm font-semibold text-slate-900">Horarios registrados</h4>
-          <div class="overflow-auto rounded-lg border border-slate-200">
-            <table class="min-w-full text-left text-sm">
-              <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600">
-                <tr>
-                  <th class="px-4 py-3">Fecha</th>
-                  <th class="px-4 py-3">Hora Inicio</th>
-                  <th class="px-4 py-3">Hora Fin</th>
-                  <th class="px-4 py-3">Descripción</th>
-                  <th class="px-4 py-3">Estado</th>
-                  <th class="px-4 py-3 text-right">Acciones</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-200">
-                <tr *ngFor="let horario of horarios" class="hover:bg-slate-50/60">
-                  <td class="px-4 py-3 text-slate-900">{{ formatDate(horario.fecha) }}</td>
-                  <td class="px-4 py-3 text-slate-600">{{ formatTime(horario.horaInicio) }}</td>
-                  <td class="px-4 py-3 text-slate-600">{{ formatTime(horario.horaFin) }}</td>
-                  <td class="px-4 py-3 text-slate-600">{{ horario.descripcion || '-' }}</td>
-                  <td class="px-4 py-3">
-                    <span
-                      class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium"
-                      [class.bg-emerald-100]="horario.estado === 'A'"
-                      [class.text-emerald-700]="horario.estado === 'A'"
-                      [class.bg-slate-100]="horario.estado !== 'A'"
-                      [class.text-slate-600]="horario.estado !== 'A'"
-                    >
-                      {{ horario.estado === 'A' ? 'Activo' : 'Inactivo' }}
-                    </span>
-                  </td>
-                  <td class="px-4 py-3 text-right">
-                    <button
-                      type="button"
-                      class="rounded bg-red-100 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-200"
-                      (click)="confirmarEliminarHorario(horario)"
-                    >
-                      Eliminar
-                    </button>
-                  </td>
-                </tr>
-                <tr *ngIf="horarios.length === 0">
-                  <td colspan="6" class="px-4 py-8 text-center text-slate-500">
-                    No hay horarios para esta actividad.
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Mensaje cuando no hay actividad seleccionada -->
-        <div *ngIf="!actividadSeleccionadaHorario" class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
-          <p class="text-sm text-slate-500">Selecciona una actividad para gestionar sus horarios.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==================== MODAL DE CONFIRMACIÓN ==================== -->
-  <div *ngIf="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" (click)="closeModal()">
-    <div class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl" (click)="$event.stopPropagation()">
-      <h3 class="mb-2 text-lg font-semibold text-slate-900">{{ modalTitle }}</h3>
-      <p class="mb-6 text-sm text-slate-600">{{ modalMessage }}</p>
-      <div class="flex justify-end gap-3">
-        <button
-          type="button"
-          class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          (click)="closeModal()"
-        >
-          Cancelar
-        </button>
-        <button
-          type="button"
-          class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
-          (click)="confirmModalAction()"
-        >
-          Confirmar
-        </button>
-      </div>
+    <!-- Formulario de Actividad (Crear/Editar) -->
+    <div *ngIf="isActivityFormVisible">
+      <app-activity-form
+        [idOrganizacion]="idOrganizacion"
+        [activity]="selectedActivity"
+        [categorias]="categorias"
+        (formSubmitted)="onActivityFormSubmitted()"
+        (formCanceled)="onActivityFormCanceled()"
+      ></app-activity-form>
     </div>
   </div>
 </div>
 
+<!-- ==================== MODAL DE CONFIRMACIÓN ==================== -->
+<div *ngIf="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" (click)="closeModal()">
+  <div class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl" (click)="$event.stopPropagation()">
+    <h3 class="mb-2 text-lg font-semibold text-slate-900">{{ modalTitle }}</h3>
+    <p class="mb-6 text-sm text-slate-600">{{ modalMessage }}</p>
+    <div class="flex justify-end gap-3">
+      <button type="button" (click)="closeModal()" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Cancelar</button>
+      <button type="button" (click)="confirmModalAction()" class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700">Confirmar</button>
+    </div>
+  </div>
+</div>

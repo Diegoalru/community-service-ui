@@ -1,0 +1,107 @@
+<form [formGroup]="activityForm" (ngSubmit)="saveActivity()" class="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+  <h3 class="text-sm font-semibold text-slate-900">
+    {{ activity ? 'Editar Actividad' : 'Crear Nueva Actividad' }}
+  </h3>
+
+  <div *ngIf="errorMessage" class="rounded-md bg-red-50 p-3">
+    <p class="text-sm text-red-700">{{ errorMessage }}</p>
+  </div>
+
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <!-- Nombre -->
+    <div class="form-group md:col-span-2">
+      <label class="mb-1 block text-xs font-medium text-slate-700">Nombre *</label>
+      <input
+        type="text"
+        formControlName="nombre"
+        placeholder="Nombre de la actividad"
+        class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+      />
+    </div>
+
+    <!-- Categoría -->
+    <div class="form-group">
+      <label class="mb-1 block text-xs font-medium text-slate-700">Categoría *</label>
+      <select
+        formControlName="idCategoria"
+        class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+      >
+        <option [ngValue]="null" disabled>Selecciona...</option>
+        <option *ngFor="let cat of categorias" [ngValue]="cat.idCategoria">
+          {{ cat.nombre }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Descripción -->
+    <div class="form-group md:col-span-2">
+      <label class="mb-1 block text-xs font-medium text-slate-700">Descripción</label>
+      <textarea
+        formControlName="descripcion"
+        rows="3"
+        placeholder="Descripción breve de la actividad"
+        class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+      ></textarea>
+    </div>
+
+    <!-- Fecha inicio -->
+    <div class="form-group">
+      <label class="mb-1 block text-xs font-medium text-slate-700">Fecha/Hora Inicio *</label>
+      <input
+        type="datetime-local"
+        formControlName="fechaInicio"
+        class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+      />
+    </div>
+
+    <!-- Fecha fin -->
+    <div class="form-group">
+      <label class="mb-1 block text-xs font-medium text-slate-700">Fecha/Hora Fin *</label>
+      <input
+        type="datetime-local"
+        formControlName="fechaFin"
+        class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+      />
+    </div>
+
+    <!-- Horas -->
+    <div class="form-group">
+      <label class="mb-1 block text-xs font-medium text-slate-700">Horas Acreditadas *</label>
+      <input
+        type="number"
+        formControlName="horas"
+        min="1"
+        class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+      />
+    </div>
+
+    <!-- Cupos -->
+    <div class="form-group">
+      <label class="mb-1 block text-xs font-medium text-slate-700">Cupos *</label>
+      <input
+        type="number"
+        formControlName="cupos"
+        min="1"
+        class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+      />
+    </div>
+  </div>
+
+  <!-- Botones de Acción -->
+  <div class="mt-4 flex justify-end gap-3 border-t border-slate-200 pt-4">
+    <button
+      type="button"
+      (click)="cancel()"
+      class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+    >
+      Cancelar
+    </button>
+    <button
+      type="submit"
+      [disabled]="isLoading"
+      class="rounded-lg bg-blue-600 px-6 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+    >
+      {{ isLoading ? 'Guardando...' : (activity ? 'Actualizar' : 'Crear') }}
+    </button>
+  </div>
+</form>

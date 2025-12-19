@@ -68,6 +68,22 @@ export interface ActividadCreacionIntegracionDto {
   };
 }
 
+export interface ActividadActualizacionIntegracionDto {
+  idUsuarioSolicitante: number;
+  actividad: {
+    idActividad: number;
+    idOrganizacion: number;
+    idCategoria: number;
+    idUbicacion: number;
+    nombre: string;
+    descripcion: string;
+    fechaInicio: string;
+    fechaFin: string;
+    horas: number;
+    cupos: number;
+  };
+}
+
 export interface HorarioActividadCreateDto {
   idOrganizacion: number;
   idActividad: number;
