@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { AdminSessionService } from '../../core/services/admin-session.service';
 
 
 @Component({
@@ -23,15 +24,16 @@ export class  LoginComponent {
     private fb: FormBuilder,
     private router: Router,
     private route: ActivatedRoute,
-    private authService: AuthService
+    private authService: AuthService,
+    private adminSessionService: AdminSessionService
   ) {
     this.loginForm = this.fb.group({
       usuario: ['', [Validators.required]],
       password: ['', [Validators.required]],
     });
 
-    // Get return URL from route parameters or default to '/'
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+    // Get return URL from route parameters or default to events page
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/events/inscriptions';
   }
 
   onSubmit(): void {
@@ -42,6 +44,9 @@ export class  LoginComponent {
       this.errorMessage = 'Verifica que el correo y la contraseña sean válidos.';
       return;
     }
+
+    // Limpiar sesión de administración anterior (por token expirado o usuario diferente)
+    this.adminSessionService.clearSession();
 
     this.isLoading = true;
     const { usuario, password } = this.loginForm.value;
