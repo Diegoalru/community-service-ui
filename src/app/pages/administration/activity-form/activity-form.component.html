@@ -23,24 +23,6 @@
       </p>
     </div>
 
-    <!-- Categoría -->
-    <div class="form-group">
-      <label class="mb-1 block text-xs font-medium text-slate-700">Categoría *</label>
-      <select
-        formControlName="idCategoria"
-        class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-        [class.border-red-500]="activityForm.get('idCategoria')?.touched && activityForm.get('idCategoria')?.invalid"
-      >
-        <option [ngValue]="null" disabled>Selecciona...</option>
-        <option *ngFor="let cat of categorias" [ngValue]="cat.idCategoria">
-          {{ cat.nombre }}
-        </option>
-      </select>
-      <p *ngIf="activityForm.get('idCategoria')?.touched && activityForm.get('idCategoria')?.invalid" class="mt-1 text-xs text-red-500">
-        Debes seleccionar una categoría.
-      </p>
-    </div>
-
     <!-- Descripción -->
     <div class="form-group md:col-span-2">
       <label class="mb-1 block text-xs font-medium text-slate-700">Descripción</label>

@@ -144,7 +144,6 @@ export class ActivityFormComponent implements OnInit, OnChanges {
       fechaFin: ['', Validators.required],
       horas: [1, [Validators.required, Validators.min(1)]],
       cupos: [10, [Validators.required, Validators.min(1)]],
-      idCategoria: [null, Validators.required],
       // Ubicación
       idPais: [null, Validators.required],
       idProvincia: [{ value: null, disabled: true }, Validators.required],
@@ -292,7 +291,7 @@ export class ActivityFormComponent implements OnInit, OnChanges {
         actividad: {
           idActividad: this.activity.idActividad,
           idOrganizacion: this.idOrganizacion,
-          idCategoria: formValue.idCategoria,
+          idCategoria: 4,
           ubicacion: {
             idPais: Number(formValue.idPais),
             idProvincia: Number(formValue.idProvincia),
@@ -317,7 +316,7 @@ export class ActivityFormComponent implements OnInit, OnChanges {
         idUsuarioSolicitante,
         actividad: {
           idOrganizacion: this.idOrganizacion,
-          idCategoria: formValue.idCategoria,
+          idCategoria: 4,
           nombre: formValue.nombre,
           descripcion: formValue.descripcion || '',
           fechaInicio: formValue.fechaInicio,

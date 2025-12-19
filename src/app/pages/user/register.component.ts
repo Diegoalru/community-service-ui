@@ -652,22 +652,22 @@ export class RegisterComponent implements OnInit {
         password: formValue.password
       },
       perfil: {
-        id_identificador: Number(formValue.tipoIdentificador),
+        idIdentificador: Number(formValue.tipoIdentificador),
         identificacion: formValue.identificacion,
         nombre: formValue.nombre,
-        apellido_p: formValue.apellidoPaterno,
-        apellido_m: formValue.apellidoMaterno || null,
-        fecha_nacimiento: formValue.fechaNacimiento,
-        id_universidad: formValue.universidad ? Number(formValue.universidad) : null,
+        apellidoP: formValue.apellidoPaterno,
+        apellidoM: formValue.apellidoMaterno || null,
+        fechaNacimiento: formValue.fechaNacimiento,
+        idUniversidad: formValue.universidad ? Number(formValue.universidad) : null,
         carrera: formValue.carrera || null
       },
       ubicacion: {
-        id_pais: Number(formValue.pais),
-        id_provincia: Number(formValue.provincia),
-        id_canton: Number(formValue.canton),
-        id_distrito: Number(formValue.distrito),
+        idPais: Number(formValue.pais),
+        idProvincia: Number(formValue.provincia),
+        idCanton: Number(formValue.canton),
+        idDistrito: Number(formValue.distrito),
         direccion: formValue.direccion || null,
-        codigo_postal: formValue.codigoPostal || null
+        codigoPostal: formValue.codigoPostal || null
       },
       correspondencia: this.buildCorrespondenciaArray(formValue)
     };
@@ -705,7 +705,7 @@ export class RegisterComponent implements OnInit {
 
     // Add primary email (required)
     correspondencia.push({
-      id_tipo_correspondencia: 1, // Email type
+      idTipoCorrespondencia: 1, // Email type
       valor: formValue.email,
       consentimiento: 'S'
     });
@@ -714,7 +714,7 @@ export class RegisterComponent implements OnInit {
     formValue.correspondenciaAdicional.forEach((item: any) => {
       if (item.tipoCorrespondencia && item.valor) {
         correspondencia.push({
-          id_tipo_correspondencia: item.tipoCorrespondencia,
+          idTipoCorrespondencia: item.tipoCorrespondencia,
           valor: item.valor,
           consentimiento: item.consentimiento ? 'S' : 'N'
         });

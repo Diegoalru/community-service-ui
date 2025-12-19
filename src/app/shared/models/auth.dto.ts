@@ -11,30 +11,30 @@ export interface UsuarioRegDto {
 }
 
 export interface PerfilRegDto {
-  id_identificador: number;
+  idIdentificador: number;
   identificacion: string;
   nombre: string;
-  apellido_p: string;
-  apellido_m?: string | null;
-  fecha_nacimiento: string; // Formato YYYY-MM-DD
-  id_universidad?: number | null;
+  apellidoP: string;
+  apellidoM?: string | null;
+  fechaNacimiento: string; // Formato YYYY-MM-DD
+  idUniversidad?: number | null;
   carrera?: string | null;
   bibliografia?: string | null;
 }
 
 export interface UbicacionRegDto {
-  id_pais: number;
-  id_provincia: number;
-  id_canton: number;
-  id_distrito: number;
+  idPais: number;
+  idProvincia: number;
+  idCanton: number;
+  idDistrito: number;
   direccion?: string | null;
-  codigo_postal?: string | null;
+  codigoPostal?: string | null;
   latitud?: number | null;
   longitud?: number | null;
 }
 
 export interface CorrespondenciaRegDto {
-  id_tipo_correspondencia: number;
+  idTipoCorrespondencia: number;
   valor: string;
   consentimiento?: 'S' | 'N' | null;
 }
@@ -72,4 +72,3 @@ export interface ApiMensaje {
   token?: string;
   idUsuario?: number;
 }
-
